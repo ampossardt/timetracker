@@ -1,3 +1,39 @@
+var app = {
+	processAndStoreClients : function(response) {
+		let clients = JSON.parse(response);
+		let clientList = [];
+
+		for(let i=0; i < clients.length; i++) {
+			let clientInfo = {
+				"id" : clients[i].id,
+				"name" : clients[i].name
+			};
+			clientList.push(clientInfo);
+			console.log(clients[i].id + ", " + clients[i].name);
+		}
+
+		chrome.storage.local.set({ "clientList" : clientList });
+	},
+	makeRequest : function(method, url, processCallback) {
+		let request = new XMLHttpRequest();
+		request.open(method, url);
+		request.setRequestHeader("Authorization", getAuthenticationToken());
+		request.onload = function() {
+			if(this.status >= 200 && this.status < 300) {
+				processCallback(request.response);
+			}
+		}
+		request.send();
+	}
+}
+
+if ( document.addEventListener ) {
+	document.addEventListener( "DOMContentLoaded", function(){
+		document.removeEventListener( "DOMContentLoaded", arguments.callee, false);
+		domReady();
+	}, false );
+}
+
 function domReady() {
 	var tabs = document.getElementsByClassName('tab');
 	var content = document.getElementsByClassName('content');
@@ -15,55 +51,15 @@ function domReady() {
 			addClass(document.getElementById(id), 'active');
 		});
 	}
-}
 
-if ( document.addEventListener ) {
-	document.addEventListener( "DOMContentLoaded", function(){
-		document.removeEventListener( "DOMContentLoaded", arguments.callee, false);
-		domReady();
-	}, false );
-}
-var requestOptions = {
-	method: '',
-	url: '',
-};
-
-function makeRequest(method, url, callback) {
-	let request = new XMLHttpRequest();
-	request.setRequestHeader("Authorization", getAuthenticationToken());
-	request.open(method, url);
-	request.onload = function() {
-		if(this.status >= 200 && this.status < 300) {
-
-		}
-	}
+	app.makeRequest('GET', 'https://www.toggl.com/api/v8/clients', app.processAndStoreClients);
 }
 
 function getAuthenticationToken() {
 	let key = "5d2497ff82e41340ff6e20c4222ea428";
-	return "Basic " + btoa(apiKey + ":api_token");
-}
-
-function getAuthenticationToken(key) {
 	return "Basic " + btoa(key + ":api_token");
 }
 
-var app = {
-	makeRequest : function(method, url, processCallback) {
-		let request = new XMLHttpRequest();
-		request.setRequestHeader("Authorization", getAuthenticationToken());
-		request.open(method, url);
-		request.onload = function() {
-			if(this.status >= 200 && this.status < 300) {
-				processCallback(request.response);
-			}
-		}
-	},
-
-}
-
-curl -v -u 1971800d4d82861d8f2c1651fea4d212:5d2497ff82e41340ff6e20c4222ea428 \
-	-X GET https://www.toggl.com/api/v8/clients
 //
 // function domReady() {
 // 	chrome.storage.local.get('apiKey', function(result) {
