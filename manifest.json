@@ -1,0 +1,21 @@
+{
+  "name": "Intranet Helper",
+  "manifest_version" : 2,
+  "version": "1.1",
+  "description": "Plug in which lets you add your time from toggl automatically into an intranet task.",
+  "content_scripts": [
+  {
+	"matches": ["http://intranet.theprimacy.com/*"],
+	"js": ["contentscript.js"]
+  }
+],
+  "permissions": ["storage","tabs", "https://www.toggl.com/*"],
+  "browser_action": {
+	"default_icon": {
+		"64" : "icon.png",
+		"128" : "icon_128.png"
+	},
+    "default_title": "Intranet Helper",
+    "default_popup": "popup.html"
+  }
+}

@@ -1,0 +1,152 @@
+<html>
+	<head>
+		<link rel="stylesheet" href="popup - new.css" />
+		<script type="text/javascript" src="util.js"></script>
+		<script type="text/javascript" src="popup - new.js"></script>
+	</head>
+	<body>
+		<div class="tabs">
+			<ul>
+				<li class="tab active" data-content="login">
+					Login
+				</li>
+				<li class="tab" data-content="tasks">
+					Tasks
+				</li>
+				<li class="tab" data-content="clients">
+					Clients
+				</li>
+				<li class="tab" data-content="projects">
+					Projects
+				</li>
+			</ul>
+		</div>
+		<div class="content-container">
+			<div class="content active" id="login">
+				<label for="apiKey">API Key</label>
+				<input type="text" id="apiKey" /><a href="#" class="button">Test and Save</a>
+			</div>
+			<div class="content" id="tasks">
+				Tasks
+			</div>
+			<div class="content" id="clients">
+				<a href="#" class="button">Update</a> <label class="inline" for="autoSyncClients"><input type="checkbox" id="autoSyncClients" checked /> Automatically Sync Clients</label>
+				<table>
+					<thead>
+						<th>
+							Name
+						</th>
+						<th>
+							ID
+						</th>
+					</thead>
+					<tbody>
+						<tr>
+							<td>
+								Client 1
+							</td>
+							<td>
+								1
+							</td>
+						</tr>
+						<tr>
+							<td>
+								Client 2
+							</td>
+							<td>
+								2
+							</td>
+						</tr>
+						<tr>
+							<td>
+								Client 3
+							</td>
+							<td>
+								3
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<div class="content" id="projects">
+				<a href="#" class="button">Update</a> <label class="inline" for="autoSyncClients"><input type="checkbox" id="autoSyncProjects" checked /> Automatically Sync Projects</label>
+				<table>
+					<thead>
+						<th>
+							Name
+						</th>
+						<th>
+							ID
+						</th>
+						<th>
+							Client Name
+						</th>
+					</thead>
+					<tbody>
+						<tr>
+							<td>
+								Project 1
+							</td>
+							<td>
+								1
+							</td>
+							<td>
+								The Client
+							</td>
+						</tr>
+						<tr>
+							<td>
+								Project 2
+							</td>
+							<td>
+								2
+							</td>
+							<td>
+								The Client
+							</td>
+						</tr>
+						<tr>
+							<td>
+								Project 3
+							</td>
+							<td>
+								3
+							</td>
+							<td>
+								The Client
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+		<!-- <div class="input-group" id="existingKeyContainer">
+			<p><strong>API Key:</strong></p>
+			<p id="existingKey"></p>
+			<a href="#" id="changeKey">Change</a>
+		</div>
+		<div class="input-group" id="setApiKey">
+			<input type="text" id="apiKey" placeholder="API Key" />
+			<label for="apiKey">API Key</label>
+			<a href="#" id="testApi" class="btn">Test It</a>
+			<img src="spinner.png" id="spinner" class="spinner"/>
+			<br>
+			<small>Find your api key <a href="https://toggl.com/app/profile" target="_blank">here</a></small>
+		</div>
+		<div class="input-group">
+			<p id="apiTestMessage"></p>
+		</div>
+		<div class="input-group">
+			<input type="text" id="startDate" placeholder="Start Date" />
+			<label for="startDate">Start Date</label>
+			<input type="text" id="endDate" placeholder="End Date" />
+			<label for="endDate">End Date</label>
+		</div>
+		<div class="input-group">
+			<a href="#" class="btn" id="getTasks">Get Tasks</a>
+			<p id="taskError"></p>
+		</div>
+		<div id="entryData">
+		</div> -->
+	</body>
+</html>
