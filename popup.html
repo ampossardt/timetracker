@@ -30,92 +30,32 @@
 				Tasks
 			</div>
 			<div class="content" id="clients">
-				<a href="#" class="button">Update</a> <label class="inline" for="autoSyncClients"><input type="checkbox" id="autoSyncClients" checked /> Automatically Sync Clients</label>
+				<a href="#" class="button" id="updateClients">Update</a> <label class="inline" for="autoSyncClients"><input type="checkbox" id="autoSyncClients" checked /> Automatically Sync Clients</label>
 				<table>
 					<thead>
 						<th>
-							Name
-						</th>
-						<th>
 							ID
 						</th>
+						<th>
+							Name
+						</th>
 					</thead>
-					<tbody>
-						<tr>
-							<td>
-								Client 1
-							</td>
-							<td>
-								1
-							</td>
-						</tr>
-						<tr>
-							<td>
-								Client 2
-							</td>
-							<td>
-								2
-							</td>
-						</tr>
-						<tr>
-							<td>
-								Client 3
-							</td>
-							<td>
-								3
-							</td>
-						</tr>
+					<tbody id="clientTableBody">
 					</tbody>
 				</table>
 			</div>
 			<div class="content" id="projects">
-				<a href="#" class="button">Update</a> <label class="inline" for="autoSyncClients"><input type="checkbox" id="autoSyncProjects" checked /> Automatically Sync Projects</label>
+				<a href="#" class="button" id="updateProjects">Update</a> <label class="inline" for="autoSyncProjects"><input type="checkbox" id="autoSyncProjects" checked /> Automatically Sync Projects</label>
 				<table>
 					<thead>
-						<th>
-							Name
-						</th>
 						<th>
 							ID
 						</th>
 						<th>
-							Client Name
+							Name
 						</th>
 					</thead>
-					<tbody>
-						<tr>
-							<td>
-								Project 1
-							</td>
-							<td>
-								1
-							</td>
-							<td>
-								The Client
-							</td>
-						</tr>
-						<tr>
-							<td>
-								Project 2
-							</td>
-							<td>
-								2
-							</td>
-							<td>
-								The Client
-							</td>
-						</tr>
-						<tr>
-							<td>
-								Project 3
-							</td>
-							<td>
-								3
-							</td>
-							<td>
-								The Client
-							</td>
-						</tr>
+					<tbody id="projectTableBody">
 					</tbody>
 				</table>
 			</div>
@@ -148,5 +88,10 @@
 		</div>
 		<div id="entryData">
 		</div> -->
+		<div class="overlay" id="overlay">
+			<div class="spinner">
+				<img src="spinner.png" />
+			</div>
+		</div>
 	</body>
 </html>
