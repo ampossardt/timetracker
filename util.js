@@ -41,3 +41,18 @@ function toggleClass(elem, name) {
     addClass(elem, name);
   }
 }
+
+function show(elem) {
+  elem.style.display = "block";
+}
+
+function hide(elem) {
+  elem.style.display = "none";
+}
+
+function element(query) {
+  let identifier = query.substring(0, 1);
+  if(identifier === '#') {
+    return document.getElementById(query.replace('#', ''));
+  }
+}
