@@ -1,4 +1,44 @@
 var app = {
+	init : function() {
+		initManualClientSync();
+		initManualProjectSync();
+		initKeyCheck();
+		this.authenticate();
+	},
+	authenticate : function(textboxKey) {
+		if(textboxKey === undefined || textboxKey === null) {
+			chrome.storage.local.get("apiKey", function(data) {
+				if(data.apiKey !== undefined) {
+					this.checkKeyValidity(data.apiKey, false);
+				} else {
+					show(element('#login'));
+				}
+			});
+		} else {
+			this.checkKeyValidity(textboxKey, true);
+		}
+	},
+	checkKeyValidity : function(key, storeValue) {
+		this.makeRequest({
+			method : 'GET',
+			url : 'https://www.toggl.com/api/v8/me',
+			success : storeValue ? () => { this.loginSuccess(); this.storeKey(key); } : this.loginSuccess,
+			failure : this.loginFailure,
+			authToken : this.getAuthenticationToken(key)
+		});
+	},
+	loginSuccess : function() {
+		chrome.notifications.create({
+			type : "basic", title : "Success!", message : "Successfully verified your API token.", iconUrl : "../icon_128.png"
+		}, () => { hide(element('#login')) });
+	},
+	loginFailure : function() {
+		console.log("TODO: update markup to show error");
+	},
+	storeKey : function(key) {
+		chrome.storage.local.set({ "apiKey" : key });
+		element("#apiKey").value = "";
+	},
 	processAndStoreClients : function(response) {
 		let clients = JSON.parse(response);
 		let clientList = [];
@@ -9,7 +49,6 @@ var app = {
 				"name" : clients[i].name
 			};
 			clientList.push(clientInfo);
-			console.log(clients[i].id + ", " + clients[i].name);
 		}
 
 		chrome.storage.local.set({ "clientList" : clientList });
@@ -20,15 +59,7 @@ var app = {
 		let body = document.getElementById('clientTableBody');
 
 		for(var i=0; i < clients.length; i++) {
-			let row = document.createElement('tr');
-			let id = document.createElement('td');
-			id.innerText = clients[i].id;
-			let name = document.createElement('td');
-			name.innerText = clients[i].name;
-
-			row.appendChild(id);
-			row.appendChild(name);
-			body.appendChild(row);
+			body.appendChild(createTwoColumnRow(clients[i].id, clients[i].name));
 		}
 	},
 	processProject : function(response) {
@@ -65,29 +96,20 @@ var app = {
 			})[0];
 
 			clientProjects.projects.forEach(function(project) {
-				var row = document.createElement('tr');
-				var id = document.createElement('td');
-				id.innerText = project.id;
-
-				var name = document.createElement('td');
-				name.innerText = project.name;
-
-				row.appendChild(id);
-				row.appendChild(name);
-				body.appendChild(row);
+				body.appendChild(createTwoColumnRow(project.id, project.name));
 			});
 		});
 		hide(element('#overlay'));
 	},
-	makeRequest : function(method, url, processCallback) {
+	makeRequest : function(options) {
 		let request = new XMLHttpRequest();
-		request.open(method, url);
-		request.setRequestHeader("Authorization", this.getAuthenticationToken());
+		request.open(options.method, options.url);
+		request.setRequestHeader("Authorization", options.authToken);
 		request.onload = function() {
 			if(this.status >= 200 && this.status < 300) {
-				processCallback(request.response);
+				options.success(request.response);
 			} else {
-				console.log("something broke");
+				options.failure();
 			}
 		}
 		request.send();
@@ -113,8 +135,11 @@ var app = {
 	getAuthenticationToken : function () {
 		let key = "5d2497ff82e41340ff6e20c4222ea428";
 		return "Basic " + btoa(key + ":api_token");
+	},
+	getAuthenticationToken : function (key) {
+		return "Basic " + btoa(key + ":api_token");
 	}
-}
+};
 
 if ( document.addEventListener ) {
 	document.addEventListener( "DOMContentLoaded", function(){
@@ -125,8 +150,7 @@ if ( document.addEventListener ) {
 
 function domReady() {
 	initTabs();
-	initManualClientSync();
-	initManualProjectSync();
+	app.init();
 }
 
 function initTabs() {
@@ -186,6 +210,17 @@ function initManualProjectSync() {
 				app.updateProjectMarkup(results, clients);
 			});
 		});
+	});
+}
+
+function initKeyCheck() {
+	var testButton = element('#testApiKey');
+	var keyTextbox = element('#apiKey');
+
+	testButton.addEventListener('click', function() {
+		if(keyTextbox.value !== "") {
+			app.authenticate(keyTextbox.value);
+		}
 	});
 }
 
