@@ -7,10 +7,7 @@
 	<body>
 		<div class="tabs">
 			<ul>
-				<li class="tab active" data-content="login">
-					Login
-				</li>
-				<li class="tab" data-content="tasks">
+				<li class="tab active" data-content="tasks">
 					Tasks
 				</li>
 				<li class="tab" data-content="clients">
@@ -22,11 +19,7 @@
 			</ul>
 		</div>
 		<div class="content-container">
-			<div class="content active" id="login">
-				<label for="apiKey">API Key</label>
-				<input type="text" id="apiKey" /><a href="#" class="button">Test and Save</a>
-			</div>
-			<div class="content" id="tasks">
+			<div class="content active" id="tasks">
 				Tasks
 			</div>
 			<div class="content" id="clients">
@@ -60,37 +53,20 @@
 				</table>
 			</div>
 		</div>
-		<!-- <div class="input-group" id="existingKeyContainer">
-			<p><strong>API Key:</strong></p>
-			<p id="existingKey"></p>
-			<a href="#" id="changeKey">Change</a>
-		</div>
-		<div class="input-group" id="setApiKey">
-			<input type="text" id="apiKey" placeholder="API Key" />
-			<label for="apiKey">API Key</label>
-			<a href="#" id="testApi" class="btn">Test It</a>
-			<img src="spinner.png" id="spinner" class="spinner"/>
-			<br>
-			<small>Find your api key <a href="https://toggl.com/app/profile" target="_blank">here</a></small>
-		</div>
-		<div class="input-group">
-			<p id="apiTestMessage"></p>
-		</div>
-		<div class="input-group">
-			<input type="text" id="startDate" placeholder="Start Date" />
-			<label for="startDate">Start Date</label>
-			<input type="text" id="endDate" placeholder="End Date" />
-			<label for="endDate">End Date</label>
-		</div>
-		<div class="input-group">
-			<a href="#" class="btn" id="getTasks">Get Tasks</a>
-			<p id="taskError"></p>
-		</div>
-		<div id="entryData">
-		</div> -->
 		<div class="overlay" id="overlay">
 			<div class="spinner">
 				<img src="spinner.png" />
+			</div>
+		</div>
+		<div class="overlay" id="login">
+			<div class="content">
+				<h2>Log In</h2>
+				<p>
+					This is either your first time using this extension or your cache has been cleared. Please enter your API key below to continue.
+				</p>
+				<label for="apiKey">API Key</label>
+				<input type="text" id="apiKey" /><a href="#" class="button" id="testApiKey">Test and Save</a><br/>
+				<small><strong>Hint:</strong> Find your api key <a href="https://toggl.com/app/profile" target="_blank">here</a></small>
 			</div>
 		</div>
 	</body>

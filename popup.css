@@ -4,6 +4,8 @@
 
 body {
 	width: 500px;
+	height: 400px;
+	overflow-y: scroll;
 }
 
 .tabs {
@@ -29,24 +31,23 @@ body {
 	color: #fff;
 }
 
-.content-container {
-
-}
-
-.content {
+.content-container .content {
 	display: none;
 	padding: 10px;
 }
 
-.content.active {
+.content-container .content.active {
 	display: block;
 }
 
 label {
 	display: block;
+	margin-bottom: 5px;
+	font-weight: bold;
 }
 
 label.inline {
+	margin-bottom: 0;
 	display: inline-block;
 }
 
@@ -54,7 +55,7 @@ input[type='text'] {
 	border: 1px solid #222;
 	border-radius: 5px;
 	padding: 5px;
-	transition: box-shadow .3s;
+	transition: box-shadow .3s, border .3s;
 	height: 30px;
 	margin-right: 10px;
 	display: inline-block;
@@ -62,7 +63,8 @@ input[type='text'] {
 
 input:focus {
 	outline: none;
-	box-shadow: 0 0 3px 1px #4285f4;
+	box-shadow: 0 0 3px 0 #4285f4;
+	border: 1px solid #999;
 }
 
 a.button {
@@ -93,6 +95,31 @@ a.button {
 .overlay .spinner img {
 	width: 50px;
 	height: 50px;
+}
+
+#login h2 {
+	text-align: center;
+	margin-top: 10px;
+}
+
+#login p {
+	text-align: center;
+	margin-bottom: 25px;
+}
+
+#login small a {
+	font-weight: bold;
+	text-decoration: underline;
+}
+
+#login .content {
+	margin: 30px auto;
+	width: 70%;
+	height: 70%;
+	background-color: #fff;
+	box-shadow: 3px 3px 8px 0 rgba(0,0,0,.6);
+	padding: 10px;
+	border-left: 5px solid #4285f4;
 }
 
 @keyframes spin {
