@@ -9,7 +9,7 @@
 	"js": ["contentscript.js"]
   }
 ],
-  "permissions": ["storage","tabs", "https://www.toggl.com/*"],
+  "permissions": ["storage","tabs", "notifications", "https://www.toggl.com/*"],
   "browser_action": {
 	"default_icon": {
 		"64" : "icon.png",
