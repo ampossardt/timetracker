@@ -54,5 +54,21 @@ function element(query) {
   let identifier = query.substring(0, 1);
   if(identifier === '#') {
     return document.getElementById(query.replace('#', ''));
+  } else {
+    return document.querySelectorAll(query);
   }
+}
+
+function createTwoColumnRow(firstValue, secondValue) {
+  var row = document.createElement('tr');
+
+  var firstCell = document.createElement('td');
+  firstCell.innerText = firstValue;
+  let secondCell = document.createElement('td');
+  secondCell.innerText = secondValue;
+
+  row.appendChild(firstCell);
+  row.appendChild(firstCell);
+
+  return row;
 }
