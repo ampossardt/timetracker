@@ -1,15 +1,22 @@
 var app = {
 	init : function() {
+		this.initListeners();
+		this.authenticate();
+	},
+	initListeners : function() {
 		initManualClientSync();
 		initManualProjectSync();
 		initKeyCheck();
-		this.authenticate();
+		initSaveSettings();
+		initOpenDialog();
+		initCloseDialog();
+		initButtonSpinner();
 	},
 	authenticate : function(textboxKey) {
 		if(textboxKey === undefined || textboxKey === null) {
 			chrome.storage.local.get("apiKey", function(data) {
 				if(data.apiKey !== undefined) {
-					this.checkKeyValidity(data.apiKey, false);
+					app.checkKeyValidity(data.apiKey, false);
 				} else {
 					show(element('#login'));
 				}
@@ -221,6 +228,35 @@ function initKeyCheck() {
 		if(keyTextbox.value !== "") {
 			app.authenticate(keyTextbox.value);
 		}
+	});
+}
+
+function initSaveSettings() {
+	let button = element("#saveSettings");
+
+	button.addEventListener('click', function() {
+		chrome.storage.local.set({ "settings" : getSettingsForSave() });
+	});
+}
+
+function getSettingsForSave() {
+	return {
+		syncClients : element('#autoSyncClients').checked,
+		syncProjects : element('#autoSyncProjects').checked
+	};
+}
+
+function initOpenDialog() {
+	element('#openSettings').addEventListener('click', () => { show(element('#settings')); });
+}
+
+function initCloseDialog() {
+	element('#closeSettings').addEventListener('click', () => { hide(element('#settings')); });
+}
+
+function initButtonSpinner() {
+	element('.button').forEach((btn) => {
+		btn.addEventListener('click', () => { addClass(btn, 'active'); });
 	});
 }
 

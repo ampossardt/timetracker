@@ -1,5 +1,6 @@
 <html>
 	<head>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
 		<link rel="stylesheet" href="popup.css" />
 		<script type="text/javascript" src="util.js"></script>
 		<script type="text/javascript" src="popup.js"></script>
@@ -18,12 +19,13 @@
 				</li>
 			</ul>
 		</div>
+		<a href="#" id="openSettings" class="button icon"><i class="fa fa-cogs"></i></a>
 		<div class="content-container">
 			<div class="content active" id="tasks">
 				Tasks
 			</div>
 			<div class="content" id="clients">
-				<a href="#" class="button" id="updateClients">Update</a> <label class="inline" for="autoSyncClients"><input type="checkbox" id="autoSyncClients" checked /> Automatically Sync Clients</label>
+				<a href="#" class="button" id="updateClients">Update<i class="fa fa-circle-o-notch fa-spin fa-fw"></i></a>
 				<table>
 					<thead>
 						<th>
@@ -38,7 +40,7 @@
 				</table>
 			</div>
 			<div class="content" id="projects">
-				<a href="#" class="button" id="updateProjects">Update</a> <label class="inline" for="autoSyncProjects"><input type="checkbox" id="autoSyncProjects" checked /> Automatically Sync Projects</label>
+				<a href="#" class="button" id="updateProjects">Update<i class="fa fa-circle-o-notch fa-spin fa-fw"></i></a>
 				<table>
 					<thead>
 						<th>
@@ -53,11 +55,6 @@
 				</table>
 			</div>
 		</div>
-		<div class="overlay" id="overlay">
-			<div class="spinner">
-				<img src="spinner.png" />
-			</div>
-		</div>
 		<div class="overlay" id="login">
 			<div class="content">
 				<h2>Log In</h2>
@@ -65,8 +62,24 @@
 					This is either your first time using this extension or your cache has been cleared. Please enter your API key below to continue.
 				</p>
 				<label for="apiKey">API Key</label>
-				<input type="text" id="apiKey" /><a href="#" class="button" id="testApiKey">Test and Save</a><br/>
+				<input type="text" id="apiKey" /><a href="#" class="button" id="testApiKey">Test and Save<i class="fa fa-circle-o-notch fa-spin fa-fw"></i></a><br/>
 				<small><strong>Hint:</strong> Find your api key <a href="https://toggl.com/app/profile" target="_blank">here</a></small>
+			</div>
+		</div>
+		<div class="overlay" id="settings">
+			<div class="content">
+				<input type="checkbox" id="autoSyncClients" checked /><label class="checkbox" for="autoSyncClients">Automatically Sync Clients</label>
+				<p>
+					When selected, automatically fetches new list of clients once per day on startup.
+				</p>
+				<input type="checkbox" id="autoSyncProjects" checked /><label class="checkbox" for="autoSyncProjects">Automatically Sync Projects</label>
+				<p>
+					When selected, automatically fetches new list of projects once per day on startup.
+				</p>
+				<p>
+					<a href="#" id="saveSettings" class="button green">Save<i class="fa fa-circle-o-notch fa-spin fa-fw"></i></a>
+				</p>
+				<i class="fa fa-times fa-2x" id="closeSettings"></i>
 			</div>
 		</div>
 	</body>

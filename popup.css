@@ -9,13 +9,15 @@ body {
 }
 
 .tabs {
-	width: 100%;
+	width: 80%;
+	display: inline-block;
 }
 
 .tabs ul {
 	list-style-type: none;
 	border-bottom: 3px solid #222;
 	padding: 0;
+	display: inline-block;
 }
 
 .tabs ul li {
@@ -42,13 +44,48 @@ body {
 
 label {
 	display: block;
-	margin-bottom: 5px;
+	margin-bottom: 10px;
 	font-weight: bold;
 }
 
-label.inline {
-	margin-bottom: 0;
-	display: inline-block;
+input[type='checkbox'] {
+  display: none;
+}
+
+.checkbox {
+  position: relative;
+  padding-left: 40px;
+  padding: 2px 0 0 30px;
+  -webkit-user-select: none;
+  user-select: none;
+  font-weight: bold;
+}
+
+.checkbox::before {
+  content: '';
+  width: 16px;
+  height: 16px;
+  background-color: #fff;
+  border-radius: 4px;
+  border: 2px solid #4285f4;
+  display: inline-block;
+  position: absolute;
+  left: 0;
+  top: 0;
+  transition: all .15s;
+}
+
+[type='checkbox']:checked + label::before {
+  background-color: #4285f4;
+}
+
+.checkbox::after {
+  content: '\f00c';
+  font-family: FontAwesome;
+  position: absolute;
+  left: 4px;
+	top: 4px;
+  color: #fff;
 }
 
 input[type='text'] {
@@ -72,8 +109,32 @@ a.button {
 	text-align: center;
 	background-color: #4285f4;
 	color: #fff;
-	padding: 6px 10px 8px;
+	padding: 6px 16px;
 	border-radius: 5px;
+	position: relative;
+	font-weight: bold;
+}
+
+a.button .fa-spin {
+	position: absolute;
+	font-size: 20px;
+	left: calc(50% - 12px);
+	top:0;
+	line-height: 30px;
+	display: none;
+	color: #fff;
+}
+
+a.button.active {
+	color: #4285f4;
+}
+
+a.button.active .fa-spin {
+	display: block;
+}
+
+a.button.green {
+	background-color: #5cb85c;
 }
 
 .overlay {
@@ -85,34 +146,21 @@ a.button {
 	display: none;
 }
 
-.overlay .spinner {
-	margin: 50px auto;
-	animation: spin 1s infinite;
-	width: 50px;
-	height: 50px;
-}
-
-.overlay .spinner img {
-	width: 50px;
-	height: 50px;
-}
-
-#login h2 {
+.overlay h2 {
 	text-align: center;
 	margin-top: 10px;
 }
 
-#login p {
-	text-align: center;
-	margin-bottom: 25px;
+.overlay p {
+	margin-bottom: 15px;
 }
 
-#login small a {
+.overlay small a {
 	font-weight: bold;
 	text-decoration: underline;
 }
 
-#login .content {
+.overlay .content {
 	margin: 30px auto;
 	width: 70%;
 	height: 70%;
@@ -122,11 +170,30 @@ a.button {
 	border-left: 5px solid #4285f4;
 }
 
-@keyframes spin {
-	0% {
-		transform: rotate(0deg);
-	}
-	100% {
-		transform: rotate(360deg);
-	}
+#settings .content {
+	position: relative;
+	padding-top: 40px;
+}
+
+#settings .fa-times {
+	position: absolute;
+	right: 5px;
+	top: 5px;
+	cursor: pointer;
+	padding: 10px;
+}
+
+a.button.icon {
+	width: 24px;
+	height: 24px;
+	font-size: 20px;
+	margin-top: 12px;
+}
+
+a.button.icon .fa {
+	line-height: 26px;
+}
+
+#openSettings {
+	float: right;
 }
