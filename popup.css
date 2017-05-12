@@ -137,6 +137,10 @@ a.button.green {
 	background-color: #5cb85c;
 }
 
+a.button.green.active {
+	color: #5cb85c;
+}
+
 .overlay {
 	width: 100%;
 	height: 100%;

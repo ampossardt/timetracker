@@ -145,6 +145,14 @@ var app = {
 	},
 	getAuthenticationToken : function (key) {
 		return "Basic " + btoa(key + ":api_token");
+	},
+	sendNotification : function(message, success, callback) {
+		chrome.notifications.create({
+			type : "basic",
+			title : success ? "Success!" : "Error",
+			"message" : message,
+			iconUrl : "../icon_128.png"
+		}, callback);
 	}
 };
 
@@ -236,6 +244,8 @@ function initSaveSettings() {
 
 	button.addEventListener('click', function() {
 		chrome.storage.local.set({ "settings" : getSettingsForSave() });
+		removeClass(element('#saveSettings'), 'active');
+		closeDialog();
 	});
 }
 
@@ -247,17 +257,20 @@ function getSettingsForSave() {
 }
 
 function initOpenDialog() {
-	element('#openSettings').addEventListener('click', () => { show(element('#settings')); });
+	element('#openSettings').addEventListener('click', openDialog);
+}
+
+function openDialog() {
+	show(element('#settings'));
 }
 
 function initCloseDialog() {
-	element('#closeSettings').addEventListener('click', () => { hide(element('#settings')); });
+	element('#closeSettings').addEventListener('click', closeDialog);
 }
 
-function initButtonSpinner() {
-	element('.button').forEach((btn) => {
-		btn.addEventListener('click', () => { addClass(btn, 'active'); });
-	});
+function closeDialog() {
+	hide(element('#settings'));
+	removeClass(element('#openSettings'), 'active');
 }
 
 // Utility Functions
