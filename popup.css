@@ -201,3 +201,13 @@ a.button.icon .fa {
 #openSettings {
 	float: right;
 }
+
+table th {
+	padding: 5px;
+	background-color: #fbe700;
+}
+
+table td {
+	text-align: center;
+	padding: 10px;
+}
