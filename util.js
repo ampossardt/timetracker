@@ -64,11 +64,21 @@ function createTwoColumnRow(firstValue, secondValue) {
 
   var firstCell = document.createElement('td');
   firstCell.innerText = firstValue;
-  let secondCell = document.createElement('td');
+  var secondCell = document.createElement('td');
   secondCell.innerText = secondValue;
 
   row.appendChild(firstCell);
-  row.appendChild(firstCell);
+  row.appendChild(secondCell);
 
   return row;
+}
+
+function getTimestamp() {
+  return new Date().toLocaleString();
+}
+
+function createTimestampMarkup(timestamp) {
+  var p = document.createElement('p');
+  p.innerText = timestamp;
+  return p;
 }
