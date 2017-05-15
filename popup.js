@@ -125,16 +125,14 @@ var app = {
 		element('#projectTimestamp').innerText = projectList.timestamp;
 
 		sortedClients.forEach(function(client) {
-			var header = document.createElement('h3');
-			header.innerText = client.name;
-			body.appendChild(header);
+			body.appendChild(createHeader(client.name));
 
 			var clientProjects = projectList.projects.filter(function(project) {
 				return project.clientId === client.id;
 			})[0];
 
 			clientProjects.projects.forEach(function(project) {
-				body.appendChild(createTwoColumnRow(project.id, project.name));
+				body.appendChild(createTwoColumnProjectRow(project.id, project.name, project.color));
 			});
 		});
 		removeClass(element('#updateProjects'), 'active');

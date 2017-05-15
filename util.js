@@ -59,11 +59,36 @@ function element(query) {
   }
 }
 
+function createHeader(text) {
+  var row = document.createElement('tr');
+  var cell = document.createElement('td');
+  cell.innerText = text;
+  cell.colSpan = 2;
+  row.appendChild(cell);
+
+  return row;
+}
+
 function createTwoColumnRow(firstValue, secondValue) {
   var row = document.createElement('tr');
 
   var firstCell = document.createElement('td');
   firstCell.innerText = firstValue;
+  var secondCell = document.createElement('td');
+  secondCell.innerText = secondValue;
+
+  row.appendChild(firstCell);
+  row.appendChild(secondCell);
+
+  return row;
+}
+
+function createTwoColumnProjectRow(firstValue, secondValue, color) {
+  var row = document.createElement('tr');
+
+  var firstCell = document.createElement('td');
+  firstCell.innerText = firstValue;
+  firstCell.style["border-left"] = "3px solid " + color;
   var secondCell = document.createElement('td');
   secondCell.innerText = secondValue;
 
