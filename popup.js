@@ -2,6 +2,7 @@ var app = {
 	init : function() {
 		this.initListeners();
 		this.authenticate();
+		this.loadStoredClientsAndProjects();
 	},
 	initListeners : function() {
 		initManualClientSync();
@@ -10,7 +11,6 @@ var app = {
 		initSaveSettings();
 		initOpenDialog();
 		initCloseDialog();
-		initButtonSpinner();
 	},
 	authenticate : function(textboxKey) {
 		if(textboxKey === undefined || textboxKey === null) {
@@ -58,16 +58,45 @@ var app = {
 			clientList.push(clientInfo);
 		}
 
-		chrome.storage.local.set({ "clientList" : clientList });
-		hideOverlay();
-		this.app.updateClientMarkup(clientList);
+		var clientObject = { timestamp : getTimestamp(), clients : clientList };
+		chrome.storage.local.set({ "clientList" : clientObject });
+		app.updateClientMarkup(clientObject);
 	},
-	updateClientMarkup : function(clients) {
+	updateClientMarkup : function(clientList, fromStorage) {
 		let body = document.getElementById('clientTableBody');
+		body.innerHTML = "";
+		element('#clientTimestamp').innerText = clientList.timestamp;
 
-		for(var i=0; i < clients.length; i++) {
-			body.appendChild(createTwoColumnRow(clients[i].id, clients[i].name));
+		for(var i=0; i < clientList.clients.length; i++) {
+			body.appendChild(createTwoColumnRow(clientList.clients[i].id, clientList.clients[i].name));
 		}
+
+		removeClass(element('#updateClients'), 'active');
+	},
+	processAndStoreProjects : function(key) {
+		chrome.storage.local.get("clientList", function(data) {
+			if(data.clientList === undefined) {
+				return;
+			}
+
+			let authToken = app.getAuthenticationToken(key);
+			let url = "https://www.toggl.com/api/v8/clients/{0}/projects";
+			var promises = [];
+			let projects = [];
+
+			data.clientList.clients.forEach(function(client) {
+				promises.push(app.makeRequestWithPromise('GET', url.replace('{0}', client.id), authToken)
+					.then(function(data){
+						projects.push(app.processProject(data));
+				}));
+			});
+
+			Promise.all(promises).then(() => {
+				var projectList = { timestamp : getTimestamp(), projects : projects };
+				app.updateProjectMarkup(projectList, data.clientList.clients);
+				chrome.storage.local.set({ "projectList" : projectList });
+			});
+		});
 	},
 	processProject : function(response) {
 		let projects = JSON.parse(response);
@@ -84,21 +113,23 @@ var app = {
 		}
 		return { "clientId" : projects[0].cid, "projects" : projectList };
 	},
-	updateProjectMarkup : function(projects, clients) {
+	updateProjectMarkup : function(projectList, clients) {
 		let body = element('#projectTableBody');
+		body.innerHTML = "";
 		let sortedClients = clients.sort(function(a,b) {
 			var first = a.name.toLowerCase(), second = b.name.toLowerCase();
 			if(first < second) return -1;
 			else if (first > second) return 1;
 			return 0;
 		});
+		element('#projectTimestamp').innerText = projectList.timestamp;
 
 		sortedClients.forEach(function(client) {
 			var header = document.createElement('h3');
 			header.innerText = client.name;
 			body.appendChild(header);
 
-			var clientProjects = projects.filter(function(project) {
+			var clientProjects = projectList.projects.filter(function(project) {
 				return project.clientId === client.id;
 			})[0];
 
@@ -106,7 +137,21 @@ var app = {
 				body.appendChild(createTwoColumnRow(project.id, project.name));
 			});
 		});
-		hide(element('#overlay'));
+		removeClass(element('#updateProjects'), 'active');
+	},
+	loadStoredClientsAndProjects : function() {
+		chrome.storage.local.get("clientList", function(data) {
+			if(data.clientList === undefined) return;
+
+			app.updateClientMarkup(data.clientList);
+
+			chrome.storage.local.get("projectList", function(projectData) {
+				if(projectData.projectList === undefined) return;
+
+				app.updateProjectMarkup(projectData.projectList, data.clientList.clients);
+			});
+
+		});
 	},
 	makeRequest : function(options) {
 		let request = new XMLHttpRequest();
@@ -121,11 +166,11 @@ var app = {
 		}
 		request.send();
 	},
-	makeRequestWithPromise : function(method, url) {
+	makeRequestWithPromise : function(method, url, authToken) {
 		return new Promise(function(success, failure) {
 			let request = new XMLHttpRequest();
 			request.open(method, url);
-			request.setRequestHeader("Authorization", this.app.getAuthenticationToken());
+			request.setRequestHeader("Authorization", authToken);
 			request.onload = function() {
 				if(this.status >= 200 && this.status < 300) {
 					success(request.response);
@@ -191,39 +236,33 @@ function initManualClientSync() {
 	let button = document.getElementById('updateClients');
 	let spinner = document.getElementById('overlay');
 
-	button.addEventListener('click', function() {
-		show(spinner);
-		app.makeRequest('GET', 'https://www.toggl.com/api/v8/clients', app.processAndStoreClients);
+	button.addEventListener('click', () => {
+		addClass(button, 'active');
+
+		chrome.storage.local.get("apiKey", function(data) {
+			if(data.apiKey === undefined) return;
+
+			app.makeRequest({
+				method : 'GET',
+				url : 'https://www.toggl.com/api/v8/clients',
+				success : app.processAndStoreClients,
+				failure : () => {},
+				authToken : app.getAuthenticationToken(data.apiKey)
+			});
+		});
 	});
 }
 
 function initManualProjectSync() {
 	let button = element("#updateProjects");
-	let spinner = element("#overlay");
 
-	button.addEventListener('click', function() {
-		show(spinner);
-		chrome.storage.local.get("clientList", function(data) {
-			if(data.clientList === undefined) {
-				console.log("haven't got the client list yet");
-				return;
-			}
+	button.addEventListener('click', () => {
+		addClass(button, 'active');
 
-			let clients = data.clientList;
-			let url = "https://www.toggl.com/api/v8/clients/{0}/projects";
-			var promises = [];
-			let results = [];
+		chrome.storage.local.get("apiKey", function(data) {
+			if(data.apiKey === undefined) return;
 
-			clients.forEach(function(client) {
-				promises.push(app.makeRequestWithPromise('GET', url.replace('{0}', client.id))
-					.then(function(data){
-						results.push(app.processProject(data));
-				}));
-			});
-
-			Promise.all(promises).then(function(values) {
-				app.updateProjectMarkup(results, clients);
-			});
+			app.processAndStoreProjects(data.apiKey);
 		});
 	});
 }
