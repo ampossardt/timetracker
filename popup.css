@@ -26,6 +26,11 @@ body {
 	padding: 10px 15px;
 	font-weight: bold;
 	cursor: pointer;
+	transition: all .3s;
+}
+
+.tabs ul li:hover {
+	background-color:#eee;
 }
 
 .tabs ul li.active {
@@ -222,11 +227,79 @@ table td.header::after {
 	display: block;
 	width:5%;
 	border-bottom: 1px solid #222;
-	margin: 0 auto;
+	margin: 10px auto 0 auto;
 }
 
 p.timestamp {
 	display: inline-block;
 	float:right;
 	margin-top: 6px;
+}
+
+/* Time Entry Styles */
+
+.filter-section {
+	background-color:#eee;
+	max-width: 100%;
+	border-radius: 4px;
+	padding: 10px 8px;
+	transition: all .3;
+}
+
+.filter-section .filter {
+	display: inline-block;
+	background-color: #fff;
+	border-radius: 8px;
+	padding: 6px 8px;
+	margin-right: 10px;
+	cursor: pointer;
+	color: #333;
+}
+
+.filter-section .filter::after {
+	content: '\f00d';
+	font-family: FontAwesome;
+	color: #222;
+	margin-left: 8px;
+}
+
+.filter-slideout-container {
+	max-width: 100%;
+	margin-bottom: 10px;
+}
+
+.filter-slideout-container a {
+	display: block;
+	background-color: #eee;
+	border: 1px solid #bbb;
+	padding: 10px 5px;
+	cursor: pointer;
+	color: #333;
+	transition: color .3s;
+}
+
+.filter-slideout-container a.active {
+	color: orange;
+}
+
+.filter-slideout-container a::before {
+	font-family: FontAwesome;
+	content: '\f067';
+	margin-right: 8px;
+}
+
+.filter-slideout-container .filter-content {
+	max-height: 0;
+	padding: 10px;
+	max-width: 100%;
+	overflow: hidden;
+	transition: max-height .3s;
+}
+
+.filter-slideout-container .filter-content.active {
+	max-height: 300px;
+}
+
+.filter-slideout-container .filter-content section {
+	padding: 10px 0;
 }

@@ -11,6 +11,7 @@ var app = {
 		initSaveSettings();
 		initOpenDialog();
 		initCloseDialog();
+		initToggleFilters();
 	},
 	authenticate : function(textboxKey) {
 		if(textboxKey === undefined || textboxKey === null) {
@@ -308,6 +309,19 @@ function initCloseDialog() {
 function closeDialog() {
 	hide(element('#settings'));
 	removeClass(element('#openSettings'), 'active');
+}
+
+function initToggleFilters() {
+	let toggle = element('#filterToggle');
+	toggle.addEventListener('click', (event) => {
+		if(hasClass(event.target, 'active')) {
+			removeClass(event.target, 'active');
+			removeClass(event.target.nextElementSibling, 'active');
+		} else {
+			addClass(event.target, 'active');
+			addClass(event.target.nextElementSibling, 'active');
+		}
+	});
 }
 
 // Utility Functions
