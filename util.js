@@ -64,6 +64,7 @@ function createHeader(text) {
   var cell = document.createElement('td');
   cell.innerText = text;
   cell.colSpan = 2;
+  cell.classList.add("header");
   row.appendChild(cell);
 
   return row;

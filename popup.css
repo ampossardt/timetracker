@@ -113,6 +113,7 @@ a.button {
 	border-radius: 5px;
 	position: relative;
 	font-weight: bold;
+	margin-bottom: 10px;
 }
 
 a.button .fa-spin {
@@ -210,4 +211,22 @@ table th {
 table td {
 	text-align: center;
 	padding: 10px;
+}
+
+table td.header {
+	font-weight: bold;
+}
+
+table td.header::after {
+	content:'';
+	display: block;
+	width:5%;
+	border-bottom: 1px solid #222;
+	margin: 0 auto;
+}
+
+p.timestamp {
+	display: inline-block;
+	float:right;
+	margin-top: 6px;
 }
