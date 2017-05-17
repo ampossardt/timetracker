@@ -11,7 +11,6 @@ var app = {
 		initSaveSettings();
 		initOpenDialog();
 		initCloseDialog();
-		initToggleFilters();
 	},
 	authenticate : function(textboxKey) {
 		if(textboxKey === undefined || textboxKey === null) {
@@ -66,7 +65,7 @@ var app = {
 	updateClientMarkup : function(clientList, fromStorage) {
 		let body = document.getElementById('clientTableBody');
 		body.innerHTML = "";
-		element('#clientTimestamp').innerText = clientList.timestamp;
+		element('#clientTimestamp').innerText = new Date(clientList.timestamp).toLocaleString();
 
 		for(var i=0; i < clientList.clients.length; i++) {
 			body.appendChild(createTwoColumnRow(clientList.clients[i].id, clientList.clients[i].name));
@@ -123,7 +122,7 @@ var app = {
 			else if (first > second) return 1;
 			return 0;
 		});
-		element('#projectTimestamp').innerText = projectList.timestamp;
+		element('#projectTimestamp').innerText = new Date(projectList.timestamp).toLocaleString();
 
 		sortedClients.forEach(function(client) {
 			body.appendChild(createHeader(client.name));
@@ -139,17 +138,31 @@ var app = {
 		removeClass(element('#updateProjects'), 'active');
 	},
 	loadStoredClientsAndProjects : function() {
-		chrome.storage.local.get("clientList", function(data) {
+		chrome.storage.local.get(["clientList", "projectList", "settings"], function(data) {
+			var settings = getSettingsForSave();
+			if(data.settings === undefined) {
+				chrome.storage.local.set({ "settings" : settings });
+			} else {
+				settings = data.settings;
+			}
+			var updateThreshold = new Date();
+			updateThreshold.setDate(updateThreshold.getDate() - 1);
+
 			if(data.clientList === undefined) return;
 
-			app.updateClientMarkup(data.clientList);
+			if(settings.syncClients && new Date(data.clientList.timestamp) < updateThreshold) {
+				element('#updateClients').click();
+			} else {
+				app.updateClientMarkup(data.clientList);
+			}
 
-			chrome.storage.local.get("projectList", function(projectData) {
-				if(projectData.projectList === undefined) return;
+			if(data.projectList === undefined) return;
 
-				app.updateProjectMarkup(projectData.projectList, data.clientList.clients);
-			});
-
+			if(settings.syncProjects && new Date(data.projectList.timestamp) < updateThreshold) {
+				element('#updateProjects').click();
+			} else {
+				app.updateProjectMarkup(data.projectList, data.clientList.clients);
+			}
 		});
 	},
 	makeRequest : function(options) {
@@ -311,18 +324,18 @@ function closeDialog() {
 	removeClass(element('#openSettings'), 'active');
 }
 
-function initToggleFilters() {
-	let toggle = element('#filterToggle');
-	toggle.addEventListener('click', (event) => {
-		if(hasClass(event.target, 'active')) {
-			removeClass(event.target, 'active');
-			removeClass(event.target.nextElementSibling, 'active');
-		} else {
-			addClass(event.target, 'active');
-			addClass(event.target.nextElementSibling, 'active');
-		}
-	});
-}
+// function initToggleFilters() {
+// 	let toggle = element('#filterToggle');
+// 	toggle.addEventListener('click', (event) => {
+// 		if(hasClass(event.target, 'active')) {
+// 			removeClass(event.target, 'active');
+// 			removeClass(event.target.nextElementSibling, 'active');
+// 		} else {
+// 			addClass(event.target, 'active');
+// 			addClass(event.target.nextElementSibling, 'active');
+// 		}
+// 	});
+// }
 
 // Utility Functions
 

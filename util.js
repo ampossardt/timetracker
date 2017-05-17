@@ -100,11 +100,11 @@ function createTwoColumnProjectRow(firstValue, secondValue, color) {
 }
 
 function getTimestamp() {
-  return new Date().toLocaleString();
+  return new Date().toString();
 }
 
 function createTimestampMarkup(timestamp) {
   var p = document.createElement('p');
-  p.innerText = timestamp;
+  p.innerText = timestamp.toLocaleString();
   return p;
 }
