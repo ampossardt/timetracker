@@ -238,31 +238,6 @@ p.timestamp {
 
 /* Time Entry Styles */
 
-.filter-section {
-	background-color:#eee;
-	max-width: 100%;
-	border-radius: 4px;
-	padding: 10px 8px;
-	transition: all .3;
-}
-
-.filter-section .filter {
-	display: inline-block;
-	background-color: #fff;
-	border-radius: 8px;
-	padding: 6px 8px;
-	margin-right: 10px;
-	cursor: pointer;
-	color: #333;
-}
-
-.filter-section .filter::after {
-	content: '\f00d';
-	font-family: FontAwesome;
-	color: #222;
-	margin-left: 8px;
-}
-
 .filter-slideout-container {
 	max-width: 100%;
 	margin-bottom: 10px;
@@ -271,7 +246,6 @@ p.timestamp {
 .filter-slideout-container a {
 	display: block;
 	background-color: #eee;
-	border: 1px solid #bbb;
 	padding: 10px 5px;
 	cursor: pointer;
 	color: #333;
@@ -285,7 +259,13 @@ p.timestamp {
 .filter-slideout-container a::before {
 	font-family: FontAwesome;
 	content: '\f067';
-	margin-right: 8px;
+	margin: 0 15px 0 5px;
+	transition: transform .3s;
+	transform: rotate(0deg);
+}
+
+.filter-slideout-container a.active::before {
+	transform: rotate(45deg);
 }
 
 .filter-slideout-container .filter-content {
