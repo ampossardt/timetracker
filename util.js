@@ -108,3 +108,34 @@ function createTimestampMarkup(timestamp) {
   p.innerText = timestamp.toLocaleString();
   return p;
 }
+
+function getTimeEntryRequestEndpoint(startDate, endDate) {
+  var url = "https://www.toggl.com/api/v8/time_entries?start_date={0}&end_date={1}";
+  var start = new Date(startDate).toISOString();
+  var end = new Date(endDate).toISOString();
+  return url.replace('{0}', start).replace('{1}', end);
+}
+
+function getTotalTime(entries) {
+  return getIntranetFriendlyTimeFromSeconds(getTotalTimeInSeconds(entries));
+}
+
+function getTotalTimeInSeconds(entries) {
+  var totalTime = 0;
+
+  entries.forEach((entry) => {
+    totalTime += parseInt(entry.duration);
+  });
+
+  return totalTime;
+}
+
+function getIntranetFriendlyTimeFromSeconds(seconds) {
+  var hours = seconds / 3600;
+  seconds -= hours * 3600;
+  var minutes = seconds / 60;
+  seconds -= minutes * 60;
+  minutes += seconds > 30 ? 1 : 0;
+
+  return hours + (minutes / 60);
+}
