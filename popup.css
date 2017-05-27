@@ -94,7 +94,7 @@ input[type='checkbox'] {
 }
 
 input[type='text'] {
-	border: 1px solid #222;
+	border: 1px solid #aaa;
 	border-radius: 5px;
 	padding: 5px;
 	transition: box-shadow .3s, border .3s;
@@ -106,7 +106,7 @@ input[type='text'] {
 input:focus {
 	outline: none;
 	box-shadow: 0 0 3px 0 #4285f4;
-	border: 1px solid #999;
+	border: 1px solid #ccc;
 }
 
 a.button {
@@ -238,48 +238,19 @@ p.timestamp {
 
 /* Time Entry Styles */
 
-.filter-slideout-container {
-	max-width: 100%;
-	margin-bottom: 10px;
+#tasks .button {
+	margin-top: 10px;
 }
 
-.filter-slideout-container a {
-	display: block;
-	background-color: #eee;
-	padding: 10px 5px;
-	cursor: pointer;
-	color: #333;
-	transition: color .3s;
+input[type='text'].error {
+	border: 1px solid red;
 }
 
-.filter-slideout-container a.active {
-	color: orange;
+input[type='text'].error:focus {
+	box-shadow: 0 0 3px 0 #rgba(255,0,0,.8);
 }
 
-.filter-slideout-container a::before {
-	font-family: FontAwesome;
-	content: '\f067';
-	margin: 0 15px 0 5px;
-	transition: transform .3s;
-	transform: rotate(0deg);
-}
-
-.filter-slideout-container a.active::before {
-	transform: rotate(45deg);
-}
-
-.filter-slideout-container .filter-content {
-	max-height: 0;
-	padding: 10px;
-	max-width: 100%;
-	overflow: hidden;
-	transition: max-height .3s;
-}
-
-.filter-slideout-container .filter-content.active {
-	max-height: 300px;
-}
-
-.filter-slideout-container .filter-content section {
-	padding: 10px 0;
+#invalidDate {
+	color: red;
+	display: none;
 }

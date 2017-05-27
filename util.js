@@ -139,3 +139,12 @@ function getIntranetFriendlyTimeFromSeconds(seconds) {
 
   return hours + (minutes / 60);
 }
+
+function isEmpty(item) {
+  return item === '' || item === undefined || item === null || item === NaN;
+}
+
+function isValidDate(text) {
+  let regex = new RegExp(/(.*)/);
+  return !isEmpty(text) && regex.test(item);
+}

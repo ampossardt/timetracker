@@ -137,6 +137,20 @@ var app = {
 		});
 		removeClass(element('#updateProjects'), 'active');
 	},
+	processAndStoreTimeEntries : function(key) {
+		app.makeRequest({
+			url : app.getTimeEntryRequestEndpoint(),
+			method : 'GET',
+
+		});
+	},
+	getTimeEntryRequestEndpoint : function() {
+		let startInput = getStartDate();
+		let endInput = getEndDate();
+		let url = 'https://www.toggl.com/api/v8/time_entries?start_date={0}&end_date={1}';
+
+		return url.replace('{0}', startInput)
+	},
 	loadStoredClientsAndProjects : function() {
 		chrome.storage.local.get(["clientList", "projectList", "settings"], function(data) {
 			var settings = getSettingsForSave();
@@ -279,6 +293,42 @@ function initManualProjectSync() {
 	});
 }
 
+function initManualTimeEntrySync() {
+	let button = element('#updateTimeEntries');
+	let startDate = element('#startDate');
+	let endDate = element('#endDate');
+
+	button.addEventListener('click', () => {
+		addClass(button, 'active');
+		let validStart = isValidDate(startDate.value);
+		let validEnd = isValidDate(endDate.value);
+
+		if(!validStart || !validEnd ) {
+			if(!validStart) {
+				addClass(startDate, 'error');
+			}
+
+			if(!validEnd) {
+				addClass(endDate, 'error');
+			}
+
+			show(element('#invalidDate'));
+			return;
+
+		} else {
+			removeClass(startDate, 'error');
+			removeClass(endDate, 'error');
+			hide(element('#invalidDate'));
+		}
+
+		chrome.storage.local.get("apiKey", function(data) {
+			if(data.apiKey === undefined) return;
+
+			app.processAndStoreTimeEntries(data.apiKey);
+		});
+	});
+}
+
 function initKeyCheck() {
 	var testButton = element('#testApiKey');
 	var keyTextbox = element('#apiKey');
@@ -322,6 +372,18 @@ function initCloseDialog() {
 function closeDialog() {
 	hide(element('#settings'));
 	removeClass(element('#openSettings'), 'active');
+}
+
+function getStartDate() {
+	let startInput = element('#endDate');
+
+	if(IsEmpty(startInput.value)) return new Date();
+
+	return startInput.value;
+}
+
+function getEndDate() {
+	element('#endDate');
 }
 
 // function initToggleFilters() {
