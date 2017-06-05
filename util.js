@@ -109,13 +109,6 @@ function createTimestampMarkup(timestamp) {
   return p;
 }
 
-function getTimeEntryRequestEndpoint(startDate, endDate) {
-  var url = "https://www.toggl.com/api/v8/time_entries?start_date={0}&end_date={1}";
-  var start = new Date(startDate).toISOString();
-  var end = new Date(endDate).toISOString();
-  return url.replace('{0}', start).replace('{1}', end);
-}
-
 function getTotalTime(entries) {
   return getIntranetFriendlyTimeFromSeconds(getTotalTimeInSeconds(entries));
 }
@@ -145,6 +138,6 @@ function isEmpty(item) {
 }
 
 function isValidDate(text) {
-  let regex = new RegExp(/(.*)/);
-  return !isEmpty(text) && regex.test(item);
+  let regex = new RegExp(/^\d{1,2}\/\d{1,2}\/\d{4}$/);
+  return !isEmpty(text) && regex.test(text);
 }

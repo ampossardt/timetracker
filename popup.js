@@ -7,6 +7,7 @@ var app = {
 	initListeners : function() {
 		initManualClientSync();
 		initManualProjectSync();
+		initManualTimeEntrySync();
 		initKeyCheck();
 		initSaveSettings();
 		initOpenDialog();
@@ -87,7 +88,7 @@ var app = {
 			data.clientList.clients.forEach(function(client) {
 				promises.push(app.makeRequestWithPromise('GET', url.replace('{0}', client.id), authToken)
 					.then(function(data){
-						projects.push(app.processProject(data));
+						projects.push(app.processProject(data, client));
 				}));
 			});
 
@@ -98,7 +99,7 @@ var app = {
 			});
 		});
 	},
-	processProject : function(response) {
+	processProject : function(response, client) {
 		let projects = JSON.parse(response);
 		if(projects === null) return {};
 		let projectList = [];
@@ -107,7 +108,8 @@ var app = {
 			let project = {
 				"id" : projects[i].id,
 				"name" : projects[i].name,
-				"color" : projects[i].hex_color
+				"color" : projects[i].hex_color,
+				"client" : client
 			};
 			projectList.push(project);
 		}
@@ -141,15 +143,99 @@ var app = {
 		app.makeRequest({
 			url : app.getTimeEntryRequestEndpoint(),
 			method : 'GET',
-
+			success : app.processRawEntries,
+			failure : () => {},
+			authToken : app.getAuthenticationToken(key)
 		});
 	},
+	processRawEntries : function(data) {
+		chrome.storage.local.get(["clientList", "projectList"], (result) => {
+			if(result.clientList === undefined || result.projectList === undefined
+				|| data.length === 0) return;
+
+				var items = [];
+				var entries = JSON.parse(data);
+
+				entries.forEach((entry) => {
+					var project;
+					result.projectList.projects.forEach((projectContainer) => {
+						var innerProject = projectContainer.projects.find((pr) => {
+							return pr.id === entry.pid;
+						});
+
+						if(innerProject !== undefined) project = innerProject;
+					});
+
+					if(project === undefined) return;
+
+					var clientId = project.client.id;
+					var projectId = project.id;
+
+					if(items[clientId] === undefined) {
+						items[clientId] = app.buildClientProjectStructure(project, entry);
+					} else {
+						if(items[clientId].projects[projectId] === undefined) {
+							var projectItem = {
+								projectName : project.name,
+								entries : []
+							}
+							projectItem.entries[entry.description] = {
+								timeSeconds : entry.duration, timeFormatted : 0
+							};
+
+							items[clientId].projects[projectId] = projectItem;
+						} else {
+							if(items[clientId].projects[projectId].entries[entry.description] === undefined) {
+								items[clientId].projects[projectId].entries[entry.description] = {
+									timeSeconds : entry.duration, timeFormatted : 0
+								};
+							} else {
+								items[clientId].projects[projectId].entries[entry.description].timeSeconds += entry.duration;
+							}
+						}
+					}
+				});
+
+				console.log(JSON.stringify(items));
+		});
+	},
+	buildClientProjectStructure : function(project, entry) {
+		var entryItem = { timeSeconds : entry.duration, timeFormatted : 0 };
+		var projectItem = {
+			projectName : project.name,
+			entries : []
+		};
+		projectItem.entries[entry.description] = entryItem;
+
+		var clientItem = {
+			clientName : project.client.name,
+			projects : []
+		};
+		clientItem.projects[project.client.id] = projectItem;
+
+		return clientItem;
+	},
+	// var entries = [
+	//		12345 : {
+	// 	clientId : 12345,
+	// 	clientName : "Test Client",
+	// 	projects : [
+	//			123456 : {
+	// 		projectId : 123456,
+	// 		projectName : "Test Project",
+	// 		entries : [{
+	//			"Some Description" : {
+	// 			timeSeconds : 1204,
+	// 			description : "Lorem Ipsum Dolor"
+	// 		}}]
+	// 	}]
+	// }];
 	getTimeEntryRequestEndpoint : function() {
-		let startInput = getStartDate();
-		let endInput = getEndDate();
+		let startDate = getDate(element('#startDate'));
+		let endDate = getDate(element('#endDate'));
 		let url = 'https://www.toggl.com/api/v8/time_entries?start_date={0}&end_date={1}';
 
-		return url.replace('{0}', startInput)
+		return url.replace('{0}', encodeURIComponent(startDate.toISOString())).replace('{1}', encodeURIComponent(endDate.toISOString()));
 	},
 	loadStoredClientsAndProjects : function() {
 		chrome.storage.local.get(["clientList", "projectList", "settings"], function(data) {
@@ -311,8 +397,8 @@ function initManualTimeEntrySync() {
 			if(!validEnd) {
 				addClass(endDate, 'error');
 			}
-
 			show(element('#invalidDate'));
+			removeClass(button, 'active');
 			return;
 
 		} else {
@@ -323,7 +409,6 @@ function initManualTimeEntrySync() {
 
 		chrome.storage.local.get("apiKey", function(data) {
 			if(data.apiKey === undefined) return;
-
 			app.processAndStoreTimeEntries(data.apiKey);
 		});
 	});
@@ -374,33 +459,6 @@ function closeDialog() {
 	removeClass(element('#openSettings'), 'active');
 }
 
-function getStartDate() {
-	let startInput = element('#endDate');
-
-	if(IsEmpty(startInput.value)) return new Date();
-
-	return startInput.value;
-}
-
-function getEndDate() {
-	element('#endDate');
-}
-
-// function initToggleFilters() {
-// 	let toggle = element('#filterToggle');
-// 	toggle.addEventListener('click', (event) => {
-// 		if(hasClass(event.target, 'active')) {
-// 			removeClass(event.target, 'active');
-// 			removeClass(event.target.nextElementSibling, 'active');
-// 		} else {
-// 			addClass(event.target, 'active');
-// 			addClass(event.target.nextElementSibling, 'active');
-// 		}
-// 	});
-// }
-
-// Utility Functions
-
-function hideOverlay() {
-	hide(document.getElementById('overlay'));
+function getDate(input) {
+	return isEmpty(input.value) ? new Date() : new Date(input.value);
 }
