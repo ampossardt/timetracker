@@ -69,7 +69,12 @@ var app = {
 		element('#clientTimestamp').innerText = new Date(clientList.timestamp).toLocaleString();
 
 		for(var i=0; i < clientList.clients.length; i++) {
-			body.appendChild(createTwoColumnRow(clientList.clients[i].id, clientList.clients[i].name));
+			body.appendChild(createRow({
+				cells : [
+						{ value : clientList.clients[i].id, classes : [], styles : {} },
+						{ value : clientList.clients[i].name, classes : [], styles : {} }
+					]
+			}));
 		}
 
 		removeClass(element('#updateClients'), 'active');
@@ -127,7 +132,10 @@ var app = {
 		element('#projectTimestamp').innerText = new Date(projectList.timestamp).toLocaleString();
 
 		sortedClients.forEach(function(client) {
-			body.appendChild(createHeader(client.name, 2));
+			body.appendChild(createRow({
+					cells : [{ value : client.name, classes : ["header"], styles : {}, span : 2 }]
+				})
+			);
 
 			var clientProjects = projectList.projects.filter(function(project) {
 				return project.clientId === client.id;
@@ -138,7 +146,12 @@ var app = {
 			// in the time entries processing.
 
 			clientProjects.projects.forEach(function(project) {
-				body.appendChild(createTwoColumnProjectRow(project.id, project.name, project.color));
+				body.appendChild(createRow({
+					cells : [
+							{ value : project.id, classes : [], styles : { "border-left" : "3px solid " + project.color } },
+							{ value : project.name, classes : [], styles : {} }
+						]
+				}));
 			});
 		});
 		removeClass(element('#updateProjects'), 'active');
@@ -260,11 +273,22 @@ var app = {
 			if(client === "count") return;
 
 			var clientItem = items[client];
-			body.appendChild(createHeader(clientItem.clientName, 3));
+			body.appendChild(createRow({
+					cells : [{ value : clientItem.clientName, classes : ["header"], styles : {}, span : 3 }]
+				})
+			);
 
 			for(var project in clientItem.projects) {
 				var projectItem = clientItem.projects[project];
-				body.appendChild(createSubHeader(projectItem.projectName, 3, projectItem.color));
+				body.appendChild(createRow({
+						cells : [{ value : projectItem.projectName, classes : ["sub-header"],
+							styles : {
+								"background-color" : projectItem.color,
+								"color" : getFontColorForBackgroundColor(projectItem.color)
+							}, span : 3 }]
+					})
+				);
+
 				var totalTime = 0.0;
 
 				for(var entry in projectItem.entries) {
@@ -276,28 +300,26 @@ var app = {
 					}
 
 					totalTime += entryItem.timeFormatted;
-					body.appendChild(createThreeColumnRow(entry, entryItem.timeFormatted, ""));
+					body.appendChild(createRow({
+						cells : [
+								{ value : entry, classes : [], styles : {} },
+								{ value : entryItem.timeFormatted, classes : [], styles : {} },
+								{ value : "", classes : [], styles : {} }
+							]
+					}));
 				}
 				var button = createTimeEntryButton(client, project);
-				body.appendChild(createThreeColumnTimeEntrySummaryRow("Total", totalTime, button));
+				body.appendChild(createRow({
+					cells : [
+							{ value : "Total", classes : [], styles : {} },
+							{ value : totalTime, classes : [], styles : {} },
+							{ value : button, classes : [], styles : {} }
+						],
+					rowClass : "total"
+				}));
 			}
 		}
 	},
-	// var entries = [
-	//		12345 : {
-	// 	clientId : 12345,
-	// 	clientName : "Test Client",
-	// 	projects : [
-	//			123456 : {
-	// 		projectId : 123456,
-	// 		projectName : "Test Project",
-	// 		entries : [{
-	//			"Some Description" : {
-	// 			timeSeconds : 1204,
-	// 			description : "Lorem Ipsum Dolor"
-	// 		}}]
-	// 	}]
-	// }];
 	getTimeEntryRequestEndpoint : function() {
 		let startDate = getDate(element('#startDate'));
 		let endDate = getDate(element('#endDate'));

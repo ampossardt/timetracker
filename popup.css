@@ -210,6 +210,10 @@ a.button.icon .fa {
 	float: right;
 }
 
+table {
+	width: 100%;
+}
+
 table th {
 	padding: 5px;
 	background-color: #fbe700;
@@ -264,4 +268,8 @@ a.button.time-entry {
 
 #tasks table {
 	margin-top: 50px;
+}
+
+#tasks table tr.total {
+	font-weight: bold;
 }

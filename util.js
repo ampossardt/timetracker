@@ -59,34 +59,6 @@ function element(query) {
   }
 }
 
-function createHeader(text, columnSpan) {
-  var row = document.createElement('tr');
-  var cell = document.createElement('td');
-  cell.innerText = text;
-  cell.colSpan = columnSpan;
-  cell.classList.add("header");
-  row.appendChild(cell);
-
-  return row;
-}
-
-function createSubHeader(text, columnSpan, color) {
-  var row = document.createElement('tr');
-  var cell = document.createElement('td');
-  cell.innerText = text;
-  cell.colSpan = columnSpan;
-  cell.classList.add("sub-header");
-
-  if(color !== undefined) {
-    cell.style["background-color"] = color;
-    cell.style["color"] = getFontColorForBackgroundColor(color);
-  }
-
-  row.appendChild(cell);
-
-  return row;
-}
-
 function getFontColorForBackgroundColor(hexCode) {
   var bareHex = hexCode.replace('#', '');
   var red = parseInt(bareHex.substring(0, 2), 16);
@@ -100,66 +72,38 @@ function getFontColorForBackgroundColor(hexCode) {
   else
     return "#ffffff";
 }
+// {
+//   cells : [{ value : "", classes : [], styles : { "key" : "value" }, span : 3 }],
+//   rowClass : ""
+// }
 
-function createTwoColumnRow(firstValue, secondValue) {
+function createRow(options) {
   var row = document.createElement('tr');
+  if(options.rowClass !== undefined) row.classList.add(options.rowClass);
 
-  var firstCell = document.createElement('td');
-  firstCell.innerText = firstValue;
-  var secondCell = document.createElement('td');
-  secondCell.innerText = secondValue;
+  options.cells.forEach((cell) => {
 
-  row.appendChild(firstCell);
-  row.appendChild(secondCell);
+    var td = document.createElement('td');
+    cell.classes.forEach((className) => {
+      td.classList.add(className);
+    });
 
-  return row;
-}
+    for(var key in cell.styles) {
+      if(cell.styles.hasOwnProperty(key)) {
+        td.style[key] = cell.styles[key];
+      }
+    }
 
-function createTwoColumnProjectRow(firstValue, secondValue, color) {
-  var row = document.createElement('tr');
+    td.colSpan = cell.span === undefined ? 1 : cell.span;
 
-  var firstCell = document.createElement('td');
-  firstCell.innerText = firstValue;
-  firstCell.style["border-left"] = "3px solid " + color;
-  var secondCell = document.createElement('td');
-  secondCell.innerText = secondValue;
+    if(isElement(cell.value)) {
+      td.appendChild(cell.value);
+    } else {
+      td.innerText = cell.value;
+    }
 
-  row.appendChild(firstCell);
-  row.appendChild(secondCell);
-
-  return row;
-}
-
-function createThreeColumnRow(firstValue, secondValue, thirdValue) {
-  var row = document.createElement('tr');
-
-  var firstCell = document.createElement('td');
-  firstCell.innerText = firstValue;
-  var secondCell = document.createElement('td');
-  secondCell.innerText = secondValue;
-  var thirdCell = document.createElement('td');
-  thirdCell.innerText = thirdValue;
-
-  row.appendChild(firstCell);
-  row.appendChild(secondCell);
-  row.appendChild(thirdCell);
-
-  return row;
-}
-
-function createThreeColumnTimeEntrySummaryRow(firstValue, secondValue, addTimeButton) {
-  var row = document.createElement('tr');
-
-  var firstCell = document.createElement('td');
-  firstCell.innerText = firstValue;
-  var secondCell = document.createElement('td');
-  secondCell.innerText = secondValue;
-  var thirdCell = document.createElement('td');
-  thirdCell.appendChild(addTimeButton);
-
-  row.appendChild(firstCell);
-  row.appendChild(secondCell);
-  row.appendChild(thirdCell);
+    row.appendChild(td);
+  });
 
   return row;
 }
@@ -238,6 +182,10 @@ function isEmpty(item) {
 function isValidDate(text) {
   let regex = new RegExp(/^\d{1,2}\/\d{1,2}\/\d{4}$/);
   return !isEmpty(text) && regex.test(text);
+}
+
+function isElement(obj) {
+  return obj instanceof HTMLElement || obj[0] instanceof HTMLElement;
 }
 
 function removeActiveButtons(){
