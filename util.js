@@ -70,15 +70,35 @@ function createHeader(text, columnSpan) {
   return row;
 }
 
-function createSubHeader(text, columnSpan) {
+function createSubHeader(text, columnSpan, color) {
   var row = document.createElement('tr');
   var cell = document.createElement('td');
   cell.innerText = text;
   cell.colSpan = columnSpan;
   cell.classList.add("sub-header");
+
+  if(color !== undefined) {
+    cell.style["background-color"] = color;
+    cell.style["color"] = getFontColorForBackgroundColor(color);
+  }
+
   row.appendChild(cell);
 
   return row;
+}
+
+function getFontColorForBackgroundColor(hexCode) {
+  var bareHex = hexCode.replace('#', '');
+  var red = parseInt(bareHex.substring(0, 2), 16);
+  var green = parseInt(bareHex.substring(2, 4), 16);
+  var blue = parseInt(bareHex.substring(4, 6), 16);
+  //magic numbers
+  var luminance = 0.2126 * red + 0.7152 * green + 0.0722 * blue;
+
+  if(luminance > 186)
+    return "#aeaeae";
+  else
+    return "#ffffff";
 }
 
 function createTwoColumnRow(firstValue, secondValue) {
@@ -218,4 +238,11 @@ function isEmpty(item) {
 function isValidDate(text) {
   let regex = new RegExp(/^\d{1,2}\/\d{1,2}\/\d{4}$/);
   return !isEmpty(text) && regex.test(text);
+}
+
+function removeActiveButtons(){
+  var button = element('a.button.active');
+  for(var i=0; i<button.length; i++) {
+    removeClass(button[i], 'active');
+  }
 }

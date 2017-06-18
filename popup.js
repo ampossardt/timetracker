@@ -2,7 +2,7 @@ var app = {
 	init : function() {
 		this.initListeners();
 		this.authenticate();
-		this.loadStoredClientsAndProjects();
+		this.loadStoredData();
 	},
 	initListeners : function() {
 		initManualClientSync();
@@ -157,40 +157,48 @@ var app = {
 			if(result.clientList === undefined || result.projectList === undefined
 				|| data.length === 0) return;
 
-				var items = { count : 0 };
-				var entries = JSON.parse(data);
+			var items = { count : 0 };
+			var entries = JSON.parse(data);
 
-				entries.forEach((entry) => {
-					var project = app.getProjectForEntry(result.projectList.projects, entry);
-					if(project === undefined) return;
+			entries.forEach((entry) => {
+				var project = app.getProjectForEntry(result.projectList.projects, entry);
+				if(project === undefined) return;
 
-					var clientId = project.client.id;
-					var projectId = project.id;
-					var options = {
-						clientId : project.client.id,
-						projectId : project.id,
-						entryDesc : entry.description
-					};
+				var clientId = project.client.id;
+				var projectId = project.id;
+				var options = {
+					clientId : project.client.id,
+					projectId : project.id,
+					entryDesc : entry.description
+				};
 
-					if(app.validation.isClientMissing(items, options)) {
-						items[clientId] = app.buildClientProjectStructure(project, entry);
-						items.count++;
+				if(app.validation.isClientMissing(items, options)) {
+					items[clientId] = app.buildClientProjectStructure(project, entry);
+					items.count++;
+				} else {
+					if(app.validation.isProjectMissing(items, options)) {
+						items[clientId].projects[projectId] = app.buildProjectStructure(project, entry);
+						items[clientId].projectCount++;
 					} else {
-						if(app.validation.isProjectMissing(items, options)) {
-							items[clientId].projects[projectId] = app.buildProjectStructure(project, entry);
-							items[clientId].projectCount++;
+						if(app.validation.isEntryMissing(items, options)) {
+							items[clientId].projects[projectId].entries[entry.description] = app.buildEntryStructure(entry);
+							items[clientId].projects[projectId].entryCount++;
 						} else {
-							if(app.validation.isEntryMissing(items, options)) {
-								items[clientId].projects[projectId].entries[entry.description] = app.buildEntryStructure(entry);
-								items[clientId].projects[projectId].entryCount++;
-							} else {
-								items[clientId].projects[projectId].entries[entry.description].timeSeconds += entry.duration;
-							}
+							items[clientId].projects[projectId].entries[entry.description].timeSeconds += entry.duration;
 						}
 					}
-				});
-				app.updateTotalTime(items);
-				app.updateTimeEntryMarkup(items);
+				}
+			});
+
+			app.updateTimeEntryMarkup(items, getTimestamp());
+			chrome.storage.local.set({ entryList : {
+					timestamp : getTimestamp(),
+					items : items,
+					startDate : element('#startDate').value,
+				 	endDate : element('#endDate').value
+				}
+			});
+			removeActiveButtons();
 		});
 	},
 	validation : {
@@ -231,6 +239,7 @@ var app = {
 		var projectItem = {
 			projectName : project.name,
 			entries : {},
+			color : project.color,
 			entryCount : 1
 		};
 		projectItem.entries[entry.description] = app.buildEntryStructure(entry);
@@ -242,35 +251,29 @@ var app = {
 			timeSeconds : entry.duration, timeFormatted : 0
 		};
 	},
-	updateTotalTime : function(items) {
-		for(var client in items) {
-			if(client == "count") return;
-			for(var project in items[client].projects) {
-				for(var entry in items[client].projects[project].entries) {
-					var entryItem = items[client].projects[project].entries[entry];
-					var timeFriendly = getIntranetFriendlyTimeFromSeconds(entryItem.timeSeconds);
-					items[client].projects[project].entries[entry].timeFormatted = roundProjectTime(timeFriendly, .125);
-				}
-			}
-		}
-	},
-	updateTimeEntryMarkup : function(items) {
+	updateTimeEntryMarkup : function(items, timestamp) {
 		var body = element('#entryTableBody');
 		body.innerHTML = "";
+		element('#timeEntriesTimestamp').innerText = new Date(timestamp).toLocaleString();
 
 		for(var client in items) {
+			if(client === "count") return;
+
 			var clientItem = items[client];
 			body.appendChild(createHeader(clientItem.clientName, 3));
 
 			for(var project in clientItem.projects) {
 				var projectItem = clientItem.projects[project];
-				body.appendChild(createSubHeader(projectItem.projectName, 3));
+				body.appendChild(createSubHeader(projectItem.projectName, 3, projectItem.color));
 				var totalTime = 0.0;
 
 				for(var entry in projectItem.entries) {
 					var entryItem = projectItem.entries[entry];
-					//var entryCheckbox = createTimeEntryCheckbox(entry, entryItem);
 					var entryButton = createTimeEntryButton(client, project);
+					if(entryItem.timeFormatted === 0) {
+						var timeFriendly = getIntranetFriendlyTimeFromSeconds(entryItem.timeSeconds);
+						items[client].projects[project].entries[entry].timeFormatted = roundProjectTime(timeFriendly, .125);
+					}
 
 					totalTime += entryItem.timeFormatted;
 					body.appendChild(createThreeColumnRow(entry, entryItem.timeFormatted, ""));
@@ -302,8 +305,8 @@ var app = {
 
 		return url.replace('{0}', encodeURIComponent(startDate.toISOString())).replace('{1}', encodeURIComponent(endDate.toISOString()));
 	},
-	loadStoredClientsAndProjects : function() {
-		chrome.storage.local.get(["clientList", "projectList", "settings"], function(data) {
+	loadStoredData : function() {
+		chrome.storage.local.get(["clientList", "projectList", "entryList", "settings"], function(data) {
 			var settings = getSettingsForSave();
 			if(data.settings === undefined) {
 				chrome.storage.local.set({ "settings" : settings });
@@ -328,7 +331,16 @@ var app = {
 			} else {
 				app.updateProjectMarkup(data.projectList, data.clientList.clients);
 			}
+
+			if(data.entryList === undefined) return;
+
+			app.restoreTimeEntries(data.entryList);
 		});
+	},
+	restoreTimeEntries : function(entryList) {
+		element('#startDate').value = entryList.startDate;
+		element('#endDate').value = entryList.endDate;
+		app.updateTimeEntryMarkup(entryList.items, entryList.timestamp);
 	},
 	makeRequest : function(options) {
 		let request = new XMLHttpRequest();
