@@ -221,9 +221,9 @@ var app = {
 		var clientItem = {
 			clientName : project.client.name,
 			projects : {},
-			projectCount : 0
+			projectCount : 1
 		};
-		clientItem.projects[project.client.id] = app.buildProjectStructure(project, entry);
+		clientItem.projects[project.id] = app.buildProjectStructure(project, entry);
 
 		return clientItem;
 	},
@@ -231,7 +231,7 @@ var app = {
 		var projectItem = {
 			projectName : project.name,
 			entries : {},
-			entryCount : 0
+			entryCount : 1
 		};
 		projectItem.entries[entry.description] = app.buildEntryStructure(entry);
 
