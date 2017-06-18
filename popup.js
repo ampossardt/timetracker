@@ -127,11 +127,15 @@ var app = {
 		element('#projectTimestamp').innerText = new Date(projectList.timestamp).toLocaleString();
 
 		sortedClients.forEach(function(client) {
-			body.appendChild(createHeader(client.name));
+			body.appendChild(createHeader(client.name, 2));
 
 			var clientProjects = projectList.projects.filter(function(project) {
 				return project.clientId === client.id;
 			})[0];
+
+			// TODO: make sure that the client actually has projects. If not, we can create one from scratch but
+			// we'll probably need to ensure that everything is kosher when we're sorting through them
+			// in the time entries processing.
 
 			clientProjects.projects.forEach(function(project) {
 				body.appendChild(createTwoColumnProjectRow(project.id, project.name, project.color));
@@ -153,67 +157,128 @@ var app = {
 			if(result.clientList === undefined || result.projectList === undefined
 				|| data.length === 0) return;
 
-				var items = [];
+				var items = { count : 0 };
 				var entries = JSON.parse(data);
 
 				entries.forEach((entry) => {
-					var project;
-					result.projectList.projects.forEach((projectContainer) => {
-						var innerProject = projectContainer.projects.find((pr) => {
-							return pr.id === entry.pid;
-						});
-
-						if(innerProject !== undefined) project = innerProject;
-					});
-
+					var project = app.getProjectForEntry(result.projectList.projects, entry);
 					if(project === undefined) return;
 
 					var clientId = project.client.id;
 					var projectId = project.id;
+					var options = {
+						clientId : project.client.id,
+						projectId : project.id,
+						entryDesc : entry.description
+					};
 
-					if(items[clientId] === undefined) {
+					if(app.validation.isClientMissing(items, options)) {
 						items[clientId] = app.buildClientProjectStructure(project, entry);
+						items.count++;
 					} else {
-						if(items[clientId].projects[projectId] === undefined) {
-							var projectItem = {
-								projectName : project.name,
-								entries : []
-							}
-							projectItem.entries[entry.description] = {
-								timeSeconds : entry.duration, timeFormatted : 0
-							};
-
-							items[clientId].projects[projectId] = projectItem;
+						if(app.validation.isProjectMissing(items, options)) {
+							items[clientId].projects[projectId] = app.buildProjectStructure(project, entry);
+							items[clientId].projectCount++;
 						} else {
-							if(items[clientId].projects[projectId].entries[entry.description] === undefined) {
-								items[clientId].projects[projectId].entries[entry.description] = {
-									timeSeconds : entry.duration, timeFormatted : 0
-								};
+							if(app.validation.isEntryMissing(items, options)) {
+								items[clientId].projects[projectId].entries[entry.description] = app.buildEntryStructure(entry);
+								items[clientId].projects[projectId].entryCount++;
 							} else {
 								items[clientId].projects[projectId].entries[entry.description].timeSeconds += entry.duration;
 							}
 						}
 					}
 				});
-
-				console.log(JSON.stringify(items));
+				app.updateTotalTime(items);
+				app.updateTimeEntryMarkup(items);
 		});
 	},
-	buildClientProjectStructure : function(project, entry) {
-		var entryItem = { timeSeconds : entry.duration, timeFormatted : 0 };
-		var projectItem = {
-			projectName : project.name,
-			entries : []
-		};
-		projectItem.entries[entry.description] = entryItem;
+	validation : {
+		isClientMissing : function(entryItems, opts) {
+			return entryItems.count === 0 || isEmpty(entryItems[opts.clientId]);
+		},
+		isProjectMissing : function(entryItems, opts) {
+			return entryItems[opts.clientId].projectCount === 0 || isEmpty(entryItems[opts.clientId].projects[opts.projectId]);
+		},
+		isEntryMissing : function(entryItems, opts) {
+			return entryItems[opts.clientId].projects[opts.projectId].entryCount === 0 ||
+				isEmpty(entryItems[opts.clientId].projects[opts.projectId].entries[opts.entryDesc]);
+		}
+	},
+	getProjectForEntry : function(projects, entry) {
+		var project;
+		projects.forEach((projectContainer) => {
+			var innerProject = projectContainer.projects.find((pr) => {
+				return pr.id === entry.pid;
+			});
 
+			if(innerProject !== undefined) project = innerProject;
+		});
+
+		return project;
+	},
+	buildClientProjectStructure : function(project, entry) {
 		var clientItem = {
 			clientName : project.client.name,
-			projects : []
+			projects : {},
+			projectCount : 0
 		};
-		clientItem.projects[project.client.id] = projectItem;
+		clientItem.projects[project.client.id] = app.buildProjectStructure(project, entry);
 
 		return clientItem;
+	},
+	buildProjectStructure : function(project, entry) {
+		var projectItem = {
+			projectName : project.name,
+			entries : {},
+			entryCount : 0
+		};
+		projectItem.entries[entry.description] = app.buildEntryStructure(entry);
+
+		return projectItem;
+	},
+	buildEntryStructure : function(entry) {
+		return {
+			timeSeconds : entry.duration, timeFormatted : 0
+		};
+	},
+	updateTotalTime : function(items) {
+		for(var client in items) {
+			if(client == "count") return;
+			for(var project in items[client].projects) {
+				for(var entry in items[client].projects[project].entries) {
+					var entryItem = items[client].projects[project].entries[entry];
+					var timeFriendly = getIntranetFriendlyTimeFromSeconds(entryItem.timeSeconds);
+					items[client].projects[project].entries[entry].timeFormatted = roundProjectTime(timeFriendly, .125);
+				}
+			}
+		}
+	},
+	updateTimeEntryMarkup : function(items) {
+		var body = element('#entryTableBody');
+		body.innerHTML = "";
+
+		for(var client in items) {
+			var clientItem = items[client];
+			body.appendChild(createHeader(clientItem.clientName, 3));
+
+			for(var project in clientItem.projects) {
+				var projectItem = clientItem.projects[project];
+				body.appendChild(createSubHeader(projectItem.projectName, 3));
+				var totalTime = 0.0;
+
+				for(var entry in projectItem.entries) {
+					var entryItem = projectItem.entries[entry];
+					//var entryCheckbox = createTimeEntryCheckbox(entry, entryItem);
+					var entryButton = createTimeEntryButton(client, project);
+
+					totalTime += entryItem.timeFormatted;
+					body.appendChild(createThreeColumnRow(entry, entryItem.timeFormatted, ""));
+				}
+				var button = createTimeEntryButton(client, project);
+				body.appendChild(createThreeColumnTimeEntrySummaryRow("Total", totalTime, button));
+			}
+		}
 	},
 	// var entries = [
 	//		12345 : {

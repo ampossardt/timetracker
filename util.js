@@ -59,12 +59,23 @@ function element(query) {
   }
 }
 
-function createHeader(text) {
+function createHeader(text, columnSpan) {
   var row = document.createElement('tr');
   var cell = document.createElement('td');
   cell.innerText = text;
-  cell.colSpan = 2;
+  cell.colSpan = columnSpan;
   cell.classList.add("header");
+  row.appendChild(cell);
+
+  return row;
+}
+
+function createSubHeader(text, columnSpan) {
+  var row = document.createElement('tr');
+  var cell = document.createElement('td');
+  cell.innerText = text;
+  cell.colSpan = columnSpan;
+  cell.classList.add("sub-header");
   row.appendChild(cell);
 
   return row;
@@ -99,6 +110,52 @@ function createTwoColumnProjectRow(firstValue, secondValue, color) {
   return row;
 }
 
+function createThreeColumnRow(firstValue, secondValue, thirdValue) {
+  var row = document.createElement('tr');
+
+  var firstCell = document.createElement('td');
+  firstCell.innerText = firstValue;
+  var secondCell = document.createElement('td');
+  secondCell.innerText = secondValue;
+  var thirdCell = document.createElement('td');
+  thirdCell.innerText = thirdValue;
+
+  row.appendChild(firstCell);
+  row.appendChild(secondCell);
+  row.appendChild(thirdCell);
+
+  return row;
+}
+
+function createThreeColumnTimeEntrySummaryRow(firstValue, secondValue, addTimeButton) {
+  var row = document.createElement('tr');
+
+  var firstCell = document.createElement('td');
+  firstCell.innerText = firstValue;
+  var secondCell = document.createElement('td');
+  secondCell.innerText = secondValue;
+  var thirdCell = document.createElement('td');
+  thirdCell.appendChild(addTimeButton);
+
+  row.appendChild(firstCell);
+  row.appendChild(secondCell);
+  row.appendChild(thirdCell);
+
+  return row;
+}
+
+function createTimeEntryButton(clientId, projectId) {
+  var a = document.createElement('a');
+
+  a.setAttribute("href", "#");
+  a.classList.add("button", "time-entry");
+  a.setAttribute("data-client", clientId);
+  a.setAttribute("data-project", projectId);
+  a.innerText = "Add Time";
+
+  return a;
+}
+
 function getTimestamp() {
   return new Date().toString();
 }
@@ -131,6 +188,27 @@ function getIntranetFriendlyTimeFromSeconds(seconds) {
   minutes += seconds > 30 ? 1 : 0;
 
   return hours + (minutes / 60);
+}
+
+function roundProjectTime(hours, threshold) {
+	var hourPortion = Math.floor(hours);
+	var decimalPortion = hours - hourPortion;
+
+	if(decimalPortion >= 1) {
+		return hours;
+	}
+
+	if (decimalPortion > 0.0 && decimalPortion <= .25) {
+		decimalPortion = decimalPortion <= threshold ? 0.0 : .25;
+	} else if (decimalPortion > .25 && decimalPortion <= .5) {
+		decimalPortion = decimalPortion <= (threshold + .25) ? .25 : .5;
+	} else if (decimalPortion > .5 && decimalPortion <= .75) {
+		decimalPortion = decimalPortion <= (threshold + .5) ? .5 : .75;
+	} else if (decimalPortion > .75) {
+		decimalPortion = decimalPortion <= (threshold + .75) ? .75 : 1;
+	}
+
+	return hourPortion + decimalPortion;
 }
 
 function isEmpty(item) {
