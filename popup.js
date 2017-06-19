@@ -12,6 +12,7 @@ var app = {
 		initSaveSettings();
 		initOpenDialog();
 		initCloseDialog();
+		initAddTime();
 	},
 	authenticate : function(textboxKey) {
 		if(textboxKey === undefined || textboxKey === null) {
@@ -409,6 +410,29 @@ var app = {
 			"message" : message,
 			iconUrl : "../icon_128.png"
 		}, callback);
+	},
+	sendEntryFillMessage : function(clientId, projectId) {
+		chrome.storage.local.get("entryList", function(data) {
+			if(data.entryList === undefined) {
+				app.sendNotification("There was a problem adding your time. Please try again.", false);
+			}
+
+			var request = { time : 0.0, descriptions : [] };
+			var entries = data.entryList.items[clientId].projects[projectId].entries;
+
+			for(var key in entries) {
+				request.time += entries[key].timeFormatted;
+				request.descriptions.push(key);
+			}
+
+			chrome.tabs.query({ active : true, currentWindow : true }, (tabs) => {
+				chrome.tabs.sendMessage(tabs[0].id, request, (response) => {
+					if(!response.success) {
+						app.sendNotification(response.message, false);
+					}
+				});
+			})
+		});
 	}
 };
 
@@ -531,6 +555,18 @@ function initSaveSettings() {
 		chrome.storage.local.set({ "settings" : getSettingsForSave() });
 		removeClass(element('#saveSettings'), 'active');
 		closeDialog();
+	});
+}
+
+function initAddTime() {
+	var entryContainer = element('#entryTableBody');
+
+	entryContainer.addEventListener('click', (event) => {
+		var elem = event.target;
+
+		if(elem.classList.contains("time-entry")) {
+			app.sendEntryFillMessage(elem.getAttribute("data-client"), elem.getAttribute("data-project"));
+		}
 	});
 }
 
