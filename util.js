@@ -72,10 +72,6 @@ function getFontColorForBackgroundColor(hexCode) {
   else
     return "#ffffff";
 }
-// {
-//   cells : [{ value : "", classes : [], styles : { "key" : "value" }, span : 3 }],
-//   rowClass : ""
-// }
 
 function createRow(options) {
   var row = document.createElement('tr');
@@ -115,7 +111,7 @@ function createTimeEntryButton(clientId, projectId) {
   a.classList.add("button", "time-entry");
   a.setAttribute("data-client", clientId);
   a.setAttribute("data-project", projectId);
-  a.innerText = "Add Time";
+  a.innerHTML = "Add Time<i class='fa fa-check'></i>";
 
   return a;
 }

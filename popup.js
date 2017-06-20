@@ -324,9 +324,9 @@ var app = {
 	getTimeEntryRequestEndpoint : function() {
 		let startDate = getDate(element('#startDate'));
 		let endDate = getDate(element('#endDate'));
-		let url = 'https://www.toggl.com/api/v8/time_entries?start_date={0}&end_date={1}';
+		let url = `https://www.toggl.com/api/v8/time_entries?start_date=${startDate.toISOString()}&end_date=${endDate.toISOString()}`;
 
-		return url.replace('{0}', encodeURIComponent(startDate.toISOString())).replace('{1}', encodeURIComponent(endDate.toISOString()));
+		return url;
 	},
 	loadStoredData : function() {
 		chrome.storage.local.get(["clientList", "projectList", "entryList", "settings"], function(data) {
@@ -411,7 +411,7 @@ var app = {
 			iconUrl : "../icon_128.png"
 		}, callback);
 	},
-	sendEntryFillMessage : function(clientId, projectId) {
+	sendEntryFillMessage : function(clientId, projectId, elem) {
 		chrome.storage.local.get("entryList", function(data) {
 			if(data.entryList === undefined) {
 				app.sendNotification("There was a problem adding your time. Please try again.", false);
@@ -427,8 +427,12 @@ var app = {
 
 			chrome.tabs.query({ active : true, currentWindow : true }, (tabs) => {
 				chrome.tabs.sendMessage(tabs[0].id, request, (response) => {
-					if(!response.success) {
+					if(response === undefined) {
+						app.sendNotification("You must be on an intranet task page to add data.", false);
+					} else if (!response.success) {
 						app.sendNotification(response.message, false);
+					} else {
+						addClass(elem, 'active');
 					}
 				});
 			})
@@ -449,11 +453,14 @@ function domReady() {
 }
 
 function initTabs() {
-	var tabs = document.getElementsByClassName('tab');
-	var content = document.getElementsByClassName('content');
+	var tabs = element('.tab');
+	var content = element('.content');
+	var underline = element('.underline')[0];
 
 	for(let i=0; i < tabs.length; i++) {
 		tabs[i].addEventListener('click', function() {
+			underline.style["left"] = tabs[i].offsetLeft;
+
 			if(hasClass(this, 'active')) return;
 			let id = this.attributes["data-content"].value;
 
@@ -506,6 +513,8 @@ function initManualTimeEntrySync() {
 	let button = element('#updateTimeEntries');
 	let startDate = element('#startDate');
 	let endDate = element('#endDate');
+	var startPicker = configureDatePicker(startDate);
+	var endPicker = configureDatePicker(endDate);
 
 	button.addEventListener('click', () => {
 		addClass(button, 'active');
@@ -562,10 +571,11 @@ function initAddTime() {
 	var entryContainer = element('#entryTableBody');
 
 	entryContainer.addEventListener('click', (event) => {
+		event.preventDefault();
 		var elem = event.target;
 
 		if(elem.classList.contains("time-entry")) {
-			app.sendEntryFillMessage(elem.getAttribute("data-client"), elem.getAttribute("data-project"));
+			app.sendEntryFillMessage(elem.getAttribute("data-client"), elem.getAttribute("data-project"), elem);
 		}
 	});
 }
@@ -596,4 +606,30 @@ function closeDialog() {
 
 function getDate(input) {
 	return isEmpty(input.value) ? new Date() : new Date(input.value);
+}
+
+function configureDatePicker(elem) {
+	return new Pikaday({
+		field : elem,
+		toString(date) {
+        const day = date.getDate();
+        const month = date.getMonth() + 1;
+        const year = date.getFullYear();
+        return `${month}/${day}/${year}`;
+    },
+    parse(dateString) {
+        // dateString is the result of `toString` method
+        const parts = dateString.split('/');
+				const month = parseInt(parts[0], 10);
+        const day = parseInt(parts[1] - 1, 10);
+        const year = parseInt(parts[1], 10);
+        return new Date(year, month, day);
+    }
+	});
+}
+
+function setupNavigationUnderline() {
+
+
+
 }

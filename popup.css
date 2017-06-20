@@ -16,27 +16,34 @@ body {
 
 .tabs ul {
 	list-style-type: none;
-	border-bottom: 3px solid #222;
 	padding: 0;
-	display: inline-block;
+	position: relative;
 }
 
 .tabs ul li {
 	display: inline-block;
 	text-align: center;
-	padding: 10px 15px;
+	padding: 10px 0;
 	font-weight: bold;
 	cursor: pointer;
-	transition: all .3s;
+	width: 90px;
+	color: #aeaeae;
+	transition: color .4s;
 }
 
-.tabs ul li:hover {
-	background-color:#eee;
+.tabs ul li.underline {
+	display: inline-block;
+	position: absolute;
+	transition: all .5s;
+	height: 3px;
+	background: #4285f4;
+	left: 0;
+	bottom: 0;
+	padding: 0;
 }
 
 .tabs ul li.active {
-	background-color: #222;
-	color: #fff;
+	color: #2b2b2b;
 }
 
 .content-container .content {
@@ -235,6 +242,7 @@ table td.header {
 table td.sub-header {
 	font-size: 16px;
 	font-weight: 300;
+	border-radius: 0 0 4px 4px;
 }
 
 p.timestamp {
@@ -264,6 +272,26 @@ input[type='text'].error:focus {
 
 a.button.time-entry {
 	white-space: nowrap;
+	transition: .1s all;
+}
+
+a.button.time-entry .fa {
+	position: absolute;
+	font-size: 20px;
+	left: calc(50% - 12px);
+	top:0;
+	line-height: 30px;
+	display: none;
+	color: #fff;
+}
+
+a.button.time-entry.active {
+	background-color: #00C851;
+	color: #00C851;
+}
+
+a.button.time-entry.active .fa {
+	display: block;
 }
 
 #tasks table {
