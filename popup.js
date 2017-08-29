@@ -291,21 +291,24 @@ var app = {
 				);
 
 				var totalTime = 0.0;
+				var random = Math.floor((Math.random() * 1000000) + 1);
 
 				for(var entry in projectItem.entries) {
 					var entryItem = projectItem.entries[entry];
-					var entryButton = createTimeEntryButton(client, project);
 					if(entryItem.timeFormatted === 0) {
 						var timeFriendly = getIntranetFriendlyTimeFromSeconds(entryItem.timeSeconds);
 						items[client].projects[project].entries[entry].timeFormatted = roundProjectTime(timeFriendly, .125);
 					}
 
 					totalTime += entryItem.timeFormatted;
+					random = Math.floor((Math.random() * 1000000) + 1);
+					var checkbox = createTimeEntryCheckbox(random);
+
 					body.appendChild(createRow({
 						cells : [
 								{ value : entry, classes : [], styles : {} },
 								{ value : entryItem.timeFormatted, classes : [], styles : {} },
-								{ value : "", classes : [], styles : {} }
+								{ value : checkbox, classes : [], styles : {} }
 							]
 					}));
 				}
@@ -571,8 +574,9 @@ function initAddTime() {
 	var entryContainer = element('#entryTableBody');
 
 	entryContainer.addEventListener('click', (event) => {
-		event.preventDefault();
 		var elem = event.target;
+		if(elem.classList.contains("check")) return;
+		event.preventDefault();
 
 		if(elem.classList.contains("time-entry")) {
 			app.sendEntryFillMessage(elem.getAttribute("data-client"), elem.getAttribute("data-project"), elem);
@@ -609,6 +613,8 @@ function getDate(input) {
 }
 
 function configureDatePicker(elem) {
+	var date = new Date();
+
 	return new Pikaday({
 		field : elem,
 		toString(date) {
@@ -624,12 +630,7 @@ function configureDatePicker(elem) {
         const day = parseInt(parts[1] - 1, 10);
         const year = parseInt(parts[1], 10);
         return new Date(year, month, day);
-    }
+    },
+		defaultDate : `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`
 	});
-}
-
-function setupNavigationUnderline() {
-
-
-
 }

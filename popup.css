@@ -65,9 +65,17 @@ input[type='checkbox'] {
   display: none;
 }
 
+input[type='checkbox'].check {
+	display: initial;
+	margin: 0 auto;
+}
+
+input[type='checkbox'].check:focus {
+	box-shadow: none;
+}
+
 .checkbox {
   position: relative;
-  padding-left: 40px;
   padding: 2px 0 0 30px;
   -webkit-user-select: none;
   user-select: none;
@@ -99,6 +107,15 @@ input[type='checkbox'] {
   left: 4px;
 	top: 4px;
   color: #fff;
+}
+
+.checkbox.small::before {
+	width: 12px;
+	height: 12px;
+}
+
+.checkbox.small::after {
+	font-size: 10px;
 }
 
 input[type='text'] {

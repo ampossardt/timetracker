@@ -92,10 +92,20 @@ function createRow(options) {
 
     td.colSpan = cell.span === undefined ? 1 : cell.span;
 
-    if(isElement(cell.value)) {
-      td.appendChild(cell.value);
+    if(cell.value instanceof Array) {
+      cell.value.forEach((item) => {
+        if(isElement(item)) {
+          td.appendChild(item);
+        } else {
+          td.innerText = item;
+        }
+      });
     } else {
-      td.innerText = cell.value;
+      if(isElement(cell.value)) {
+        td.appendChild(cell.value);
+      } else {
+        td.innerText = cell.value;
+      }
     }
 
     row.appendChild(td);
@@ -114,6 +124,17 @@ function createTimeEntryButton(clientId, projectId) {
   a.innerHTML = "Add Time<i class='fa fa-check'></i>";
 
   return a;
+}
+
+function createTimeEntryCheckbox(entryId) {
+  var checkbox = document.createElement("input");
+  checkbox.setAttribute("id", `time-entry-${entryId}`);
+  checkbox.setAttribute("type", "checkbox");
+  checkbox.setAttribute("data-id", entryId);
+  checkbox.setAttribute("checked", "checked");
+  checkbox.classList.add("check");
+
+  return checkbox;
 }
 
 function getTimestamp() {

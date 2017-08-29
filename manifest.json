@@ -5,7 +5,7 @@
   "description": "Plug in which lets you add your time from toggl automatically into an intranet task.",
   "content_scripts": [
   {
-	"matches": ["http://intranet.theprimacy.com/*"],
+	"matches": ["https://intranet.theprimacy.com/*"],
 	"js": ["contentscript.js"]
   }
 ],
